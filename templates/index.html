@@ -1,0 +1,57 @@
+{% extends 'base.html' %} {% block title %}FAQ{% endblock %} {% block styles
+%}<link rel="stylesheet" href="/static/css/index.css" /><link
+  rel="stylesheet"
+  href="/static/css/submit.css"
+/>
+{% endblock %} {% block contents %}
+
+<div class="hero">
+  <h1>Interest Form Now Open</h1>
+  <p>
+    We are looking to gauge interest of people who would like to participate in
+    this YSWS! This also helps us get sponsors and actually get this running, so
+    please take a minute or two to fill out the form.
+  </p>
+  <div
+    data-fillout-id="qqzNYyH8yhus"
+    data-fillout-embed-type="slider"
+    data-fillout-button-text="Respond"
+    data-fillout-button-color="#FF1723"
+    data-fillout-button-size="large"
+    data-fillout-slider-direction="right"
+    data-fillout-inherit-parameters
+    data-fillout-popup-size="medium"
+  ></div>
+  <script src="https://server.fillout.com/embed/v1/"></script>
+</div>
+<div class="category">
+  <h1>FAQs</h1>
+  <div class="cards" id="faqContainer"></div>
+</div>
+<div class="category">
+  <h1>Rewards</h1>
+  <div class="cards" id="rewardContainer"></div>
+</div>
+<div class="category">
+  <h1>Showcase</h1>
+  <div class="cards" id="showcaseContainer"></div>
+</div>
+<div class="category">
+  <h1>Rules</h1>
+  <div class="cards" id="rulesContainer"></div>
+</div>
+<div class="hero extralongggggg">
+  <h1>Ready to submit?</h1>
+  <p>If you think you are ready to submit, feel free to submit now!</p>
+  <button class="button" onclick="openSubmitChecklist()" id="submit-start-btn">
+    Submit
+  </button>
+</div>
+
+{% endblock %} {% block scripts %}
+<script src="/static/js/faq.js"></script>
+<script src="/static/js/rewards.js"></script>
+<script src="/static/js/rules.js"></script>
+<script src="/static/js/projects.js"></script>
+<script src="/static/js/submit.js"></script>
+{% endblock %}

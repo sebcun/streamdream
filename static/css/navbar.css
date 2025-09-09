@@ -1,0 +1,170 @@
+.navbar {
+  background: linear-gradient(to bottom, #060606, #131313);
+  overflow: visible;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1rem;
+  position: relative;
+}
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-brand {
+  margin-right: 1rem;
+}
+
+.brand-img {
+  height: 40px;
+  border-radius: 8px;
+  margin-right: 8px;
+  object-fit: contain;
+  margin: 10px;
+}
+
+.navbar-links {
+  display: flex;
+  gap: 3rem;
+}
+
+.navbar a {
+  float: left;
+  display: block;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  font-size: 19px;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.navbar a:hover {
+  color: rgb(199, 199, 199);
+}
+
+.navbar a.active {
+  font-weight: 800;
+}
+
+.navbar-profile {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.profile-img {
+  height: 40px;
+  width: 40px;
+  border-radius: 10%;
+  object-fit: cover;
+  cursor: pointer;
+  transition: opacity 0.3s ease;
+}
+
+.profile-img:hover {
+  opacity: 0.65;
+}
+
+.profile-dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: linear-gradient(to bottom, #060606, #131313);
+  min-width: 160px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+  z-index: 10;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.profile-dropdown a {
+  color: white;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+  font-size: 16px;
+}
+
+.profile-dropdown a:hover {
+  color: rgb(199, 199, 199);
+}
+
+.profile-dropdown.show {
+  display: block;
+}
+
+.burger {
+  width: 25px;
+  height: 18px;
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.burger span {
+  height: 3px;
+  background: #333;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+  width: 100%;
+  position: relative;
+}
+
+.burger.active span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.burger.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.burger.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(5px, -5px);
+}
+
+@media screen and (max-width: 600px) {
+  .navbar-links {
+    display: none;
+  }
+
+  .profile-img {
+    margin-right: 15px;
+  }
+
+  .burger {
+    display: flex;
+  }
+
+  .navbar.responsive {
+    overflow: visible;
+  }
+
+  .profile-dropdown {
+    top: 100%;
+    right: 37px;
+  }
+
+  .navbar.responsive .navbar-links {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: linear-gradient(to bottom, #060606, #131313);
+    padding: 1rem;
+    gap: 1rem;
+    z-index: 1;
+  }
+
+  .navbar.responsive a {
+    float: none;
+    display: block;
+    text-align: left;
+  }
+}

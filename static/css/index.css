@@ -1,0 +1,202 @@
+.hero {
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  text-align: left;
+}
+
+.hero.extralongggggg {
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  text-align: left;
+}
+
+.hero h1 {
+  font-size: 4rem;
+  font-weight: 800;
+  margin-bottom: 0px;
+}
+
+.hero p {
+  font-size: 1.1rem;
+  margin-bottom: 20px;
+}
+
+.button {
+  padding: 10px 20px;
+  font-size: 1.2rem;
+  background: linear-gradient(var(--angle, 135deg), #8e1414 50%, #ff1f1f 100%);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.button:disabled {
+  padding: 10px 20px;
+  font-size: 1.2rem;
+  background: linear-gradient(var(--angle, 135deg), #8a5353 50%, #ffadad 100%);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  cursor: default;
+}
+.button:disabled:hover {
+  transform: scale(1);
+  font-weight: 400;
+}
+
+.button:hover {
+  transform: scale(1.1);
+  font-weight: 800;
+}
+
+.category {
+  margin-top: 50px;
+}
+.category h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 0px;
+}
+
+.cards {
+  display: flex;
+  flex-direction: row;
+  overflow-x: auto;
+  gap: 10px;
+  padding: 10px 0;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: white transparent;
+}
+
+.cards::-webkit-scrollbar {
+  height: 6px;
+}
+
+.cards::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.cards::-webkit-scrollbar-thumb {
+  background: white;
+  border-radius: 10px;
+}
+
+.card {
+  background: linear-gradient(var(--angle, 135deg), #141414 50%, #2c2c2c 100%);
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  padding: 20px;
+  margin: 10px;
+  width: 250px;
+  height: 125px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  color: white;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.card h2 {
+  font-size: 1.2rem;
+  margin: 0;
+  z-index: 1;
+  position: relative;
+  font-weight: 800;
+}
+
+.card p {
+  font-size: 0.9rem;
+  margin: 5px 0 0 0;
+  z-index: 1;
+  position: relative;
+}
+
+.card:hover {
+  transform: scale(1.05);
+  background: radial-gradient(
+    circle at var(--x, 50%) var(--y, 50%),
+    #141414 30%,
+    #2c2c2c
+  );
+}
+
+.card.red {
+  background: linear-gradient(var(--angle, 135deg), #8e1414 50%, #ff1f1f 100%);
+}
+.card.red:hover {
+  background: radial-gradient(
+    circle at var(--x, 50%) var(--y, 50%),
+    #ff1f1f 30%,
+    #8e1414
+  );
+}
+
+.card.orange {
+  background: linear-gradient(135deg, #8e5514 50%, #ff9e1f 100%);
+}
+.card.orange:hover {
+  background: radial-gradient(
+    circle at var(--x, 50%) var(--y, 50%),
+    #8e5514 30%,
+    #ff9e1f
+  );
+}
+
+.card.yellow {
+  background: linear-gradient(135deg, #8e8614 50%, #ffec1f 100%);
+}
+.card.yellow:hover {
+  background: radial-gradient(
+    circle at var(--x, 50%) var(--y, 50%),
+    #8e8614 30%,
+    #ffec1f
+  );
+}
+
+.card.green {
+  background: linear-gradient(135deg, #2c8e14 50%, #44ff1f 100%);
+}
+.card.green:hover {
+  background: radial-gradient(
+    circle at var(--x, 50%) var(--y, 50%),
+    #2c8e14 30%,
+    #44ff1f
+  );
+}
+
+.card.blue {
+  background: linear-gradient(135deg, #14148e 50%, #1f23ff 100%);
+}
+.card.blue:hover {
+  background: radial-gradient(
+    circle at var(--x, 50%) var(--y, 50%),
+    #14148e 30%,
+    #1f23ff
+  );
+}
+
+.card.purple {
+  background: linear-gradient(135deg, #80148e 50%, #e91fff 100%);
+}
+.card.purple:hover {
+  background: radial-gradient(
+    circle at var(--x, 50%) var(--y, 50%),
+    #80148e 30%,
+    #e91fff
+  );
+}

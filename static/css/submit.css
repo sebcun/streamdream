@@ -1,0 +1,83 @@
+.submit-checklist li {
+  margin-bottom: 20px;
+}
+
+.submit-checklist li input[type="checkbox"] {
+  display: none;
+}
+
+.submit-checklist li input[type="checkbox"] + label {
+  position: relative;
+  padding-left: 30px;
+  cursor: pointer;
+  font-size: 16px;
+  color: #ccc;
+}
+
+.submit-checklist li input[type="checkbox"] + label:before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #161616;
+  background: #464646;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+.submit-checklist li input[type="checkbox"]:checked + label {
+  color: #fff;
+}
+.submit-checklist li input[type="checkbox"]:checked + label:before {
+  background: #ff1f1f;
+  border-color: #9c1c1c;
+}
+
+.submit-checklist li input[type="checkbox"]:checked + label:after {
+  position: absolute;
+  left: 5px;
+  top: 0;
+  font-size: 14px;
+}
+
+.submit-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.submit-form label {
+  margin-top: 15px;
+  margin-bottom: 5px;
+  font-size: 16px;
+  color: #ccc;
+}
+
+.submit-form input,
+.submit-form textarea,
+.submit-form select {
+  padding: 10px;
+  border: 2px solid #161616;
+  background: #464646;
+  color: white;
+  border-radius: 4px;
+  font-size: 16px;
+  font-family: "Roboto", sans-serif;
+}
+
+.submit-form input:focus,
+.submit-form textarea:focus,
+.submit-form select:focus {
+  border-color: #ff1f1f;
+  outline: none;
+}
+
+.submit-form textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.submit-form button {
+  margin-top: 20px;
+  align-self: flex-start;
+}
