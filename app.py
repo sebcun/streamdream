@@ -8,13 +8,22 @@ app.secret_key=os.getenv('SECRET_KEY', "YourSecretKey")
 
 SLACK_CLIENT_ID = "2210535565.9480843134949"
 SLACK_CLIENT_SECRET = "935a8f5c810af9b8384a187eae76667c"
-SLACK_REDIRECT_URI = "https://59378dfb4d3e.ngrok-free.app/slack/callback"
+SLACK_REDIRECT_URI = "https://9fc8b4e9c214.ngrok-free.app/slack/callback"
 
 initDb()
 
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/reviewer')
+def reviewer():
+    user = session.get("slackID")
+    response, status = getProfile(slackid=user)
+    if status == 200:
+        if response['role'] != 0:
+                return render_template('reviewer.html')
+    return redirect(url_for('index'))
 
 @app.route('/api/faqs', methods=['GET'])
 def getFAQsAPI():
@@ -116,6 +125,23 @@ def submitProjectAPI():
     response, status = createProject(title, description, user, hackatimeProject, hackatimeTime, demoLink, githubLink)
     return jsonify(response), status
 
+
+
+@app.route('/api/user/<userid>', methods=['GET'])
+def userAPI(userid):
+
+    user = session.get("slackID")
+    response, status = getProfile(slackid=user)
+    if status == 200:
+        if response['role'] != 0:
+                response, status = getProfile(slackid=userid)
+                return response, status
+        
+    response, status = getProfile(slackid=user)
+    response.pop('email', None)
+    return jsonify(response), status
+        
+    
 @app.route('/api/approve/<int:projectid>', methods=['POST'])
 def approveProject(projectid):
     user = session.get("slackID")
@@ -127,7 +153,7 @@ def approveProject(projectid):
         if response['role'] == 0:
             return jsonify({"error": "Not authorized."}), 403
     
-    response, status = updateProjectApproval(projectid, 1)
+    response, status = updateProjectApproval(projectid, 1, user)
     return jsonify(response), status
 
 @app.route('/api/deny/<int:projectid>', methods=['POST'])
@@ -144,42 +170,9 @@ def denyProject(projectid):
     data = request.get_json()
     denyMessage = data.get("denyMessage", "") if data else ""
     
-    response, status = updateProjectApproval(projectid, -1, denyMessage)
+    response, status = updateProjectApproval(projectid, -1, user, denyMessage)
     return jsonify(response), status
 
-
-@app.route('/api/createrewards', methods=['GET'])
-def createrewards():
-    response, status = createReward("1 Month Streaming Subscription", "A $20USD grant to spend on your favourite streaming services.", "4 hours", "green")
-    response, status = createReward("Stickers", "Enjoy a set of stickers on the house without spending your hours once you hit 5 hours.", "5 hours", "orange")
-    response, status = createReward("Amazon Fire TV Stick 4k", "Yeah its what the title says :)", "10 hours", "red")
-    response, status = createReward("Roku Streaming Stick 4k", "Yeah its what the title says :)", "10 hours", "purple")
-    response, status = createReward("Google TV Streamer", "Yeah its what the title says :)", "20 hours", "blue")
-    response, status = createReward("Apple TV 4k WiFi", "Yeah its what the title says :)", "26 hours", "yellow")
-    response, status = createReward("JBL Charge 6", "Yeah its what the title says :)", "40 hours")
-    return jsonify(response), status
-
-@app.route('/api/createfaq', methods=['GET'])
-def createfaq():
-    createFAQ("Lorem ipsum dolor sit amet, consectetur adipiscing elit?", "Nunc feugiat diam leo. Nullam hendrerit semper dictum. Curabitur tempor semper leo at ultricies. In feugiat nulla sed elementum condimentum. Ut tristique pretium libero, ac efficitur erat mollis vel. Curabitur sed rhoncus turpis. Fusce id tortor magna.")
-    createFAQ("Lorem ipsum dolor sit amet, consectetur adipiscing elit?", "Nunc feugiat diam leo. Nullam hendrerit semper dictum. Curabitur tempor semper leo at ultricies. In feugiat nulla sed elementum condimentum. Ut tristique pretium libero, ac efficitur erat mollis vel. Curabitur sed rhoncus turpis. Fusce id tortor magna.", "red")
-    createFAQ("Lorem ipsum dolor sit amet, consectetur adipiscing elit?", "Nunc feugiat diam leo. Nullam hendrerit semper dictum. Curabitur tempor semper leo at ultricies. In feugiat nulla sed elementum condimentum. Ut tristique pretium libero, ac efficitur erat mollis vel. Curabitur sed rhoncus turpis. Fusce id tortor magna.", "orange")
-    createFAQ("Lorem ipsum dolor sit amet, consectetur adipiscing elit?", "Nunc feugiat diam leo. Nullam hendrerit semper dictum. Curabitur tempor semper leo at ultricies. In feugiat nulla sed elementum condimentum. Ut tristique pretium libero, ac efficitur erat mollis vel. Curabitur sed rhoncus turpis. Fusce id tortor magna.", "yellow")
-    createFAQ("Lorem ipsum dolor sit amet, consectetur adipiscing elit?", "Nunc feugiat diam leo. Nullam hendrerit semper dictum. Curabitur tempor semper leo at ultricies. In feugiat nulla sed elementum condimentum. Ut tristique pretium libero, ac efficitur erat mollis vel. Curabitur sed rhoncus turpis. Fusce id tortor magna.", "green")
-    createFAQ("Lorem ipsum dolor sit amet, consectetur adipiscing elit?", "Nunc feugiat diam leo. Nullam hendrerit semper dictum. Curabitur tempor semper leo at ultricies. In feugiat nulla sed elementum condimentum. Ut tristique pretium libero, ac efficitur erat mollis vel. Curabitur sed rhoncus turpis. Fusce id tortor magna.", "blue")
-    response, status = createFAQ("Lorem ipsum dolor sit amet, consectetur adipiscing elit?", "Nunc feugiat diam leo. Nullam hendrerit semper dictum. Curabitur tempor semper leo at ultricies. In feugiat nulla sed elementum condimentum. Ut tristique pretium libero, ac efficitur erat mollis vel. Curabitur sed rhoncus turpis. Fusce id tortor magna.", "purple")  
-    return jsonify(response), status
-
-@app.route('/api/createrules', methods=['GET'])
-def createrules():
-    createRule("Lorem ipsum dolor sit amet, consectetur adipiscing elit?", "Nunc feugiat diam leo. Nullam hendrerit semper dictum. Curabitur tempor semper leo at ultricies. In feugiat nulla sed elementum condimentum. Ut tristique pretium libero, ac efficitur erat mollis vel. Curabitur sed rhoncus turpis. Fusce id tortor magna.")
-    createRule("Lorem ipsum dolor sit amet, consectetur adipiscing elit?", "Nunc feugiat diam leo. Nullam hendrerit semper dictum. Curabitur tempor semper leo at ultricies. In feugiat nulla sed elementum condimentum. Ut tristique pretium libero, ac efficitur erat mollis vel. Curabitur sed rhoncus turpis. Fusce id tortor magna.", "red")
-    createRule("Lorem ipsum dolor sit amet, consectetur adipiscing elit?", "Nunc feugiat diam leo. Nullam hendrerit semper dictum. Curabitur tempor semper leo at ultricies. In feugiat nulla sed elementum condimentum. Ut tristique pretium libero, ac efficitur erat mollis vel. Curabitur sed rhoncus turpis. Fusce id tortor magna.", "orange")
-    createRule("Lorem ipsum dolor sit amet, consectetur adipiscing elit?", "Nunc feugiat diam leo. Nullam hendrerit semper dictum. Curabitur tempor semper leo at ultricies. In feugiat nulla sed elementum condimentum. Ut tristique pretium libero, ac efficitur erat mollis vel. Curabitur sed rhoncus turpis. Fusce id tortor magna.", "yellow")
-    createRule("Lorem ipsum dolor sit amet, consectetur adipiscing elit?", "Nunc feugiat diam leo. Nullam hendrerit semper dictum. Curabitur tempor semper leo at ultricies. In feugiat nulla sed elementum condimentum. Ut tristique pretium libero, ac efficitur erat mollis vel. Curabitur sed rhoncus turpis. Fusce id tortor magna.", "green")
-    createRule("Lorem ipsum dolor sit amet, consectetur adipiscing elit?", "Nunc feugiat diam leo. Nullam hendrerit semper dictum. Curabitur tempor semper leo at ultricies. In feugiat nulla sed elementum condimentum. Ut tristique pretium libero, ac efficitur erat mollis vel. Curabitur sed rhoncus turpis. Fusce id tortor magna.", "blue")
-    response, status = createRule("Lorem ipsum dolor sit amet, consectetur adipiscing elit?", "Nunc feugiat diam leo. Nullam hendrerit semper dictum. Curabitur tempor semper leo at ultricies. In feugiat nulla sed elementum condimentum. Ut tristique pretium libero, ac efficitur erat mollis vel. Curabitur sed rhoncus turpis. Fusce id tortor magna.", "purple")  
-    return jsonify(response), status
 
 if __name__ == "__main__":
     app.run(debug=True)

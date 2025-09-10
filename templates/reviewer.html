@@ -1,0 +1,25 @@
+{% extends 'base.html' %} {% block title %}Reviewer{% endblock %} {% block
+styles %}<link rel="stylesheet" href="/static/css/index.css" /><link
+  rel="stylesheet"
+  href="/static/css/submit.css"
+/>
+{% endblock %} {% block contents %}
+
+<div class="category">
+  <h1>To Review</h1>
+  <div class="cards" id="toReviewContainer"></div>
+</div>
+
+<div class="category">
+  <h1>Approved</h1>
+  <div class="cards" id="approvedContainer"></div>
+</div>
+
+<div class="category">
+  <h1>Denied</h1>
+  <div class="cards" id="deniedContainer"></div>
+</div>
+
+{% endblock %} {% block scripts %}
+<script src="/static/js/reviewer.js"></script>
+{% endblock %}

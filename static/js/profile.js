@@ -4,7 +4,6 @@ document.addEventListener("DOMContentLoaded", function () {
   fetch("/api/me")
     .then((response) => {
       if (!response.ok) {
-        console.log("not");
         const a = document.createElement("a");
         a.textContent = "Login with Slack";
         a.href = "/login";
@@ -15,6 +14,12 @@ document.addEventListener("DOMContentLoaded", function () {
     })
     .then((data) => {
       if (!data) return;
+      if (data["role"] != 0) {
+        const reviewerA = document.createElement("a");
+        reviewerA.textContent = "Reviewer";
+        reviewerA.href = "/reviewer";
+        profileDropdown.appendChild(reviewerA);
+      }
       const logoutA = document.createElement("a");
       logoutA.textContent = "Logout";
       logoutA.href = "/api/logout";

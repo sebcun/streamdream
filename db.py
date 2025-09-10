@@ -59,6 +59,7 @@ def initDb():
                         image TEXT NOT NULL,
                         approved INTEGER NOT NULL DEFAULT 0,
                         deny_message TEXT,
+                        reviewer TEXT,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     )''')
     
@@ -75,6 +76,7 @@ def initDb():
                 )''')
 
     try:
+        conn.execute('ALTER TABLE projects ADD COLUMN reviewer TEXT')
         conn.execute('ALTER TABLE projects ADD COLUMN deny_message TEXT')
     except sqlite3.OperationalError:
         pass
@@ -102,9 +104,9 @@ def getRules():
 
 def getProjects():
     conn = getDbConnection()
-    projects = conn.execute('SELECT id, title, description, author, hackatime_project, hackatime_time, demo_link, github_link, image, approved, deny_message, created_at FROM projects').fetchall()
+    projects = conn.execute('SELECT id, title, description, author, hackatime_project, hackatime_time, demo_link, github_link, image, approved, deny_message, reviewer, created_at FROM projects').fetchall()
     conn.close()
-    return [{'id': row[0], 'title': row[1], 'description': row[2], 'author': row[3], 'hackatime_project': row[4], 'hackatime_time': row[5], 'demo_link': row[6], 'github_link': row[7], 'image': row[8], 'approved': row[9], 'deny_message': row[10], 'created_at': row[11]} for row in projects], 200
+    return [{'id': row[0], 'title': row[1], 'description': row[2], 'author': row[3], 'hackatime_project': row[4], 'hackatime_time': row[5], 'demo_link': row[6], 'github_link': row[7], 'image': row[8], 'approved': row[9], 'deny_message': row[10], 'reviewer': row[11], 'created_at': row[12]} for row in projects], 200
     
 def createFAQ(question, answer, color=''):
     if not question or not answer:
@@ -155,15 +157,15 @@ def createProject(title, description, author, hackatimeProject, hackatimeTime, d
 
     return {"message": "Project submitted successfully.", "projectid": projectid}, 201
 
-def updateProjectApproval(projectid, approved, denyMessage=None):
-    if not projectid or approved not in [0, 1, -1]:
-        return {"error": "Invalid project ID or approval status."}, 400
+def updateProjectApproval(projectid, approved, reviewer, denyMessage=None):
+    if not projectid or approved not in [0, 1, -1] or not reviewer:
+        return {"error": "Invalid project ID, approval status, or reviewer not supplied."}, 400
     
     conn = getDbConnection()
     if approved == -1 and denyMessage:
-        cursor = conn.execute('UPDATE projects SET approved = ?, deny_message = ? where id = ?', (approved, denyMessage, projectid))
+        cursor = conn.execute('UPDATE projects SET approved = ?, deny_message = ?, reviewer = ? where id = ?', (approved, denyMessage, reviewer, projectid))
     else:
-        cursor = conn.execute('UPDATE projects SET approved = ? where id = ?', (approved, projectid))
+        cursor = conn.execute('UPDATE projects SET approved = ?, reviewer = ? where id = ?', (approved, reviewer,  projectid))
     if cursor.rowcount == 0:
         conn.close()
         return {"error": "Project not found."}, 404
