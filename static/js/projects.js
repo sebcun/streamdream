@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
         return response.json();
       })
       .then((data) => {
+        data = data.filter((project) => project.approved === 1);
         if (data.length == 0) {
           const card = document.createElement("div");
           card.classList.add("card");
@@ -31,24 +32,33 @@ document.addEventListener("DOMContentLoaded", function () {
 
           showcaseContainer.appendChild(card);
         }
-        data.forEach((rule) => {
+        data.forEach((project) => {
           const card = document.createElement("div");
           card.classList.add("card");
-          if (rule.color) {
-            card.classList.add(rule.color);
-          }
-          card.onclick = () => openModal(rule.rule, rule.description);
+          card.onclick = () =>
+            openModalHTML(
+              project.title,
+              `
+                <span><i class="bi bi-stopwatch-fill"></i> ${project.hackatime_time} <i class="bi bi-person-fill" style="margin-left:10px"></i> @${project.author}</span>
+                <p>${project.description}</p>
+                <button class="button" onclick="window.open('${project.demo_link}', '_blank');">Demo <i class="bi bi-box-arrow-up-right"></i></button>
+                <button class="button" onclick="window.open('${project.github_link}', '_blank');" style="margin-left:10px">Github <i class="bi bi-box-arrow-up-right"></i></button>
+                <button class="button" onclick="closeModal()" style="margin-left:10px">Close</button>
+                `
+            );
 
-          const displayRule =
-            rule.rule.length > 75 ? rule.rule.slice(0, 75) + "..." : rule.rule;
+          const displayTitle =
+            project.title.length > 75
+              ? project.title.slice(0, 75) + "..."
+              : project.title;
 
           const displayDescription =
-            rule.description.length > 30
-              ? rule.description.slice(0, 30) + "..."
-              : rule.description;
+            project.description.length > 30
+              ? project.description.slice(0, 30) + "..."
+              : project.description;
 
           card.innerHTML = `
-            <h2>${displayRule}</h2>
+            <h2>${displayTitle}</h2>
             <p>${displayDescription}</p>`;
 
           showcaseContainer.appendChild(card);

@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request, render_template, redirect, session, url_for
-from db import getFAQS, initDb, createFAQ, getRewards, createReward, getProjects, getRules, createRule, createProject
+from db import getFAQS, initDb, createFAQ, getRewards, createReward, getProjects, getRules, createRule, createProject, updateProjectApproval
 import requests, os
 from dotenv import load_dotenv
 load_dotenv()
@@ -87,6 +87,9 @@ def slackCallback():
 def meAPI():
     user = session.get("userID")
     if user:
+        reviewers = os.getenv('REVIEWERS')
+        if user in reviewers:
+            return jsonify({"message": "Logged in.", "reviewer": True}), 200
         return jsonify({"message": "Logged in."}), 200
     else:
         return jsonify({"error": "Not logged in."}), 401
@@ -109,7 +112,7 @@ def submitProjectAPI():
     title = data.get("projectName")
     description = data.get("projectDescription")
     hackatimeProject = data.get("hackatimeProject")
-    hackatimeTime = data.get("hackatimeTime")  # New field
+    hackatimeTime = data.get("hackatimeTime")
     demoLink = data.get("demoLink")
     githubLink = data.get("githubLink")
     
@@ -118,6 +121,33 @@ def submitProjectAPI():
     
     response, status = createProject(title, description, user, hackatimeProject, hackatimeTime, demoLink, githubLink)
     return jsonify(response), status
+
+@app.route('/api/approve/<int:projectid>', methods=['POST'])
+def approveProject(projectid):
+    user = session.get("userID")
+    if not user:
+        return jsonify({"error": "You must be logged in to approve a project."}), 401
+    
+    reviewers = os.getenv("REVIEWERS")
+    if user not in reviewers:
+        return jsonify({"error": "Not authorized."}), 403
+    
+    response, status = updateProjectApproval(projectid, 1)
+    return jsonify(response), status
+
+@app.route('/api/deny/<int:projectid>', methods=['POST'])
+def denyProject(projectid):
+    user = session.get("userID")
+    if not user:
+        return jsonify({"error": "You must be logged in to deny a project."}), 401
+    
+    reviewers = os.getenv("REVIEWERS")
+    if user not in reviewers:
+        return jsonify({"error": "Not authorized."}), 403
+    
+    response, status = updateProjectApproval(projectid, -1)
+    return jsonify(response), status
+
 
 @app.route('/api/createrewards', methods=['GET'])
 def createrewards():

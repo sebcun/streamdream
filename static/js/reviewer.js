@@ -1,0 +1,112 @@
+document.addEventListener("DOMContentLoaded", function () {
+  fetch("/api/me")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Network response error");
+      }
+      return response.json();
+    })
+    .then((data) => {
+      if (data.reviewer) {
+        document.getElementById("toReviewDiv").innerHTML = `
+          <div class="category">
+            <h1>To Review</h1>
+            <div class="cards" id="toReviewContainer"></div>
+          </div>
+        `;
+        const toReviewContainer = document.getElementById("toReviewContainer");
+
+        fetch("/api/projects")
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Network response error");
+            }
+            return response.json();
+          })
+          .then((projectData) => {
+            projectData = projectData.filter(
+              (project) => project.approved === 0
+            );
+            if (projectData.length == 0) {
+              const card = document.createElement("div");
+              card.classList.add("card");
+
+              card.innerHTML = `
+                <h2>No Projects in Review Queue</h2>
+                <p></p>
+              `;
+
+              toReviewContainer.appendChild(card);
+            }
+
+            projectData.forEach((project) => {
+              const card = document.createElement("div");
+              card.classList.add("card");
+              card.onclick = () =>
+                openModalHTML(
+                  project.title,
+                  `
+                <span><i class="bi bi-stopwatch-fill"></i> ${project.hackatime_time} <i class="bi bi-person-fill" style="margin-left:10px"></i> @${project.author}</span>
+                <p>${project.description}</p>
+                <button class="button" onclick="window.open('${project.demo_link}', '_blank');">Demo <i class="bi bi-box-arrow-up-right"></i></button>
+                <button class="button" onclick="window.open('${project.github_link}', '_blank');" style="margin-left:10px">Github <i class="bi bi-box-arrow-up-right"></i></button>
+                <button class="button" onclick="approveProject(${project.id});" style="margin-left:10px">Approve</button>
+                <button class="button" onclick="denyProject(${project.id});" style="margin-left:10px">Deny</button>
+                <button class="button" onclick="closeModal()" style="margin-left:10px; margin-top: 10px">Close</button>
+                `
+                );
+
+              const displayTitle =
+                project.title.length > 75
+                  ? project.title.slice(0, 75) + "..."
+                  : project.title;
+
+              const displayDescription =
+                project.description.length > 30
+                  ? project.description.slice(0, 30) + "..."
+                  : project.description;
+
+              card.innerHTML = `
+            <h2>${displayTitle}</h2>
+            <p>${displayDescription}</p>`;
+
+              toReviewContainer.appendChild(card);
+            });
+          });
+      }
+    });
+});
+
+function approveProject(id) {
+  fetch(`/api/approve/${id}`, { method: "POST" })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.message) {
+        showToast("Project approved!", { color: "success" });
+        closeModal();
+      } else {
+        showToast(data.error || "Error approving project.", { color: "error" });
+      }
+    })
+    .catch((error) => {
+      console.error("Approval error:", error);
+      showToast("Network error. Please try again.", { color: "error" });
+    });
+}
+
+function denyProject(id) {
+  fetch(`/api/deny/${id}`, { method: "POST" })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.message) {
+        showToast("Project denied.", { color: "success" });
+        closeModal();
+      } else {
+        showToast(data.error || "Error denying project.", { color: "error" });
+      }
+    })
+    .catch((error) => {
+      console.error("Approval error:", error);
+      showToast("Network error. Please try again.", { color: "error" });
+    });
+}

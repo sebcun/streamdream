@@ -131,8 +131,22 @@ def createProject(title, description, author, hackatimeProject, hackatimeTime, d
     conn = getDbConnection()
     cursor = conn.execute('INSERT INTO projects (title, description, author, hackatime_project, hackatime_time, demo_link, github_link, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', 
                           (title, description, author, hackatimeProject, hackatimeTime, demoLink, githubLink, image))
-    projectId = cursor.lastrowid
+    projectid = cursor.lastrowid
     conn.commit()
     conn.close()
 
-    return {"message": "Project submitted successfully.", "projectId": projectId}, 201
+    return {"message": "Project submitted successfully.", "projectid": projectid}, 201
+
+def updateProjectApproval(projectid, approved):
+    if not projectid or approved not in [0, 1, -1]:
+        return {"error": "Invalid project ID or approval status."}, 400
+    
+    conn = getDbConnection()
+    cursor = conn.execute('UPDATE projects SET approved = ? where id = ?', (approved, projectid))
+    if cursor.rowcount == 0:
+        conn.close()
+        return {"error": "Project not found."}, 404
+    
+    conn.commit()
+    conn.close()
+    return {"message": "Project approval update."}, 200
