@@ -37,7 +37,7 @@ def initDb():
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     )''')
 
-    # Rewards table
+    # Rules table
     conn.execute('''CREATE TABLE IF NOT EXISTS rules (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         rule TEXT NOT NULL,
@@ -58,8 +58,26 @@ def initDb():
                         github_link TEXT NOT NULL,
                         image TEXT NOT NULL,
                         approved INTEGER NOT NULL DEFAULT 0,
+                        deny_message TEXT,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     )''')
+    
+    # Profiles table
+    conn.execute('''CREATE TABLE IF NOT EXISTS profiles (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    slack_id TEXT NOT NULL UNIQUE,
+                    email TEXT,
+                    avatar TEXT,
+                    role INTEGER NOT NULL DEFAULT 0,
+                    balance INTEGER NOT NULL DEFAULT 0,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )''')
+
+    try:
+        conn.execute('ALTER TABLE projects ADD COLUMN deny_message TEXT')
+    except sqlite3.OperationalError:
+        pass
 
     conn.commit()
     conn.close()
@@ -84,9 +102,9 @@ def getRules():
 
 def getProjects():
     conn = getDbConnection()
-    projects = conn.execute('SELECT id, title, description, author, hackatime_project, hackatime_time, demo_link, github_link, image, approved, created_at FROM projects').fetchall()
+    projects = conn.execute('SELECT id, title, description, author, hackatime_project, hackatime_time, demo_link, github_link, image, approved, deny_message, created_at FROM projects').fetchall()
     conn.close()
-    return [{'id': row[0], 'title': row[1], 'description': row[2], 'author': row[3], 'hackatime_project': row[4], 'hackatime_time': row[5], 'demo_link': row[6], 'github_link': row[7], 'image': row[8], 'approved': row[9], 'created_at': row[10]} for row in projects], 200
+    return [{'id': row[0], 'title': row[1], 'description': row[2], 'author': row[3], 'hackatime_project': row[4], 'hackatime_time': row[5], 'demo_link': row[6], 'github_link': row[7], 'image': row[8], 'approved': row[9], 'deny_message': row[10], 'created_at': row[11]} for row in projects], 200
     
 def createFAQ(question, answer, color=''):
     if not question or not answer:
@@ -137,12 +155,15 @@ def createProject(title, description, author, hackatimeProject, hackatimeTime, d
 
     return {"message": "Project submitted successfully.", "projectid": projectid}, 201
 
-def updateProjectApproval(projectid, approved):
+def updateProjectApproval(projectid, approved, denyMessage=None):
     if not projectid or approved not in [0, 1, -1]:
         return {"error": "Invalid project ID or approval status."}, 400
     
     conn = getDbConnection()
-    cursor = conn.execute('UPDATE projects SET approved = ? where id = ?', (approved, projectid))
+    if approved == -1 and denyMessage:
+        cursor = conn.execute('UPDATE projects SET approved = ?, deny_message = ? where id = ?', (approved, denyMessage, projectid))
+    else:
+        cursor = conn.execute('UPDATE projects SET approved = ? where id = ?', (approved, projectid))
     if cursor.rowcount == 0:
         conn.close()
         return {"error": "Project not found."}, 404
@@ -150,3 +171,50 @@ def updateProjectApproval(projectid, approved):
     conn.commit()
     conn.close()
     return {"message": "Project approval update."}, 200
+
+def createOrUpdateProfile(slackid, email=None, avatar=None, role=None, balance=None):
+    conn = getDbConnection()
+
+    existing = conn.execute('SELECT id FROM profiles WHERE slack_id = ?', (slackid,)).fetchone()
+
+    if existing:
+        set_parts = []
+        params = []
+        if email is not None:
+            set_parts.append('email = ?')
+            params.append(email)
+        if avatar is not None:
+            set_parts.append('avatar = ?')
+            params.append(avatar)
+        if role is not None:
+            set_parts.append('role = ?')
+            params.append(role)
+        if balance is not None:
+            set_parts.append('balance = ?')
+            params.append(balance)
+        
+        if set_parts:
+            set_parts.append('updated_at = CURRENT_TIMESTAMP')
+            query = f"UPDATE profiles SET {', '.join(set_parts)} WHERE slack_id = ?"
+            params.append(slackid)
+            conn.execute(query, tuple(params))  
+
+    conn.commit()
+    conn.close()
+    return {"message": "Profile updated successfully."}, 200
+
+def getProfile(userid=None, slackid=None):
+    if not userid and not slackid:
+        return {"error": "UserID or SlackID required."}, 400
+    
+    conn = getDbConnection()
+    if userid:
+        profile = conn.execute('SELECT id, slack_id, email, avatar, role, balance, created_at, updated_at FROM profiles WHERE id = ?', (userid,)).fetchone()
+    else:
+        profile = conn.execute('SELECT id, slack_id, email, avatar, role, balance, created_at, updated_at FROM profiles WHERE slack_id = ?', (slackid,)).fetchone()
+    conn.close()
+
+    if profile:
+        return {'userid': profile[0], 'slack_id': profile[1], 'email': profile[2], 'avatar': profile[3], 'role': profile[4], 'balance': profile[5], 'created_at': profile[6], 'updated_at': profile[6]}, 200
+    
+    return {"error": "User not found."}, 404

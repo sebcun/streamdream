@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request, render_template, redirect, session, url_for
-from db import getFAQS, initDb, createFAQ, getRewards, createReward, getProjects, getRules, createRule, createProject, updateProjectApproval
+from db import getFAQS, initDb, createFAQ, getRewards, createReward, getProjects, getRules, createRule, createProject, updateProjectApproval, createOrUpdateProfile, getProfile
 import requests, os
 from dotenv import load_dotenv
 load_dotenv()
@@ -8,15 +8,12 @@ app.secret_key=os.getenv('SECRET_KEY', "YourSecretKey")
 
 SLACK_CLIENT_ID = "2210535565.9480843134949"
 SLACK_CLIENT_SECRET = "935a8f5c810af9b8384a187eae76667c"
-SLACK_REDIRECT_URI = "https://60afb8458133.ngrok-free.app/slack/callback"
+SLACK_REDIRECT_URI = "https://59378dfb4d3e.ngrok-free.app/slack/callback"
 
 initDb()
 
 @app.route('/')
 def index():
-    user = session.get("userID")
-    if user:
-        print("asd")
     return render_template('index.html')
 
 @app.route('/api/faqs', methods=['GET'])
@@ -41,7 +38,7 @@ def getProjectsAPI():
 
 @app.route('/api/hackatime', methods=['GET'])
 def getHackatimeAPI():
-    user = session.get("userID")
+    user = session.get("slackID")
     if user:
         response = requests.get(f"https://hackatime.hackclub.com/api/v1/users/{user}/stats?limit=1000&features=projects").json()
         return jsonify(response), 200
@@ -72,25 +69,22 @@ def slackCallback():
     if not tokenResponse.get("ok"):
         return jsonify({"error": "Invalid login code provided from Slack."}), 400
     
-    idToken = tokenResponse.get("id_token")
     userInfo = requests.get("https://slack.com/api/openid.connect.userInfo", headers={
         "Authorization": f"Bearer {tokenResponse['access_token']}"
     }).json()
 
-    session["userID"] = userInfo["sub"]
-    session["email"] = userInfo["email"]
-    session["avatar"] = userInfo["picture"]
+    session["slackID"] = userInfo["sub"]
+
+    createOrUpdateProfile(userInfo["sub"], userInfo["email"], userInfo["picture"])
 
     return redirect(url_for('index'))
 
 @app.route('/api/me', methods=['GET'])
 def meAPI():
-    user = session.get("userID")
+    user = session.get("slackID")
     if user:
-        reviewers = os.getenv('REVIEWERS')
-        if user in reviewers:
-            return jsonify({"message": "Logged in.", "reviewer": True}), 200
-        return jsonify({"message": "Logged in."}), 200
+        response, status = getProfile(slackid=user)
+        return response, status
     else:
         return jsonify({"error": "Not logged in."}), 401
     
@@ -101,7 +95,7 @@ def logout():
 
 @app.route('/api/submitproject', methods=['POST'])
 def submitProjectAPI():
-    user = session.get("userID")
+    user = session.get("slackID")
     if not user:
         return jsonify({"error": "You must be logged in to submit a project."}), 401
     
@@ -124,28 +118,33 @@ def submitProjectAPI():
 
 @app.route('/api/approve/<int:projectid>', methods=['POST'])
 def approveProject(projectid):
-    user = session.get("userID")
+    user = session.get("slackID")
     if not user:
         return jsonify({"error": "You must be logged in to approve a project."}), 401
     
-    reviewers = os.getenv("REVIEWERS")
-    if user not in reviewers:
-        return jsonify({"error": "Not authorized."}), 403
+    response, status = getProfile(slackid=user)
+    if status == 200:
+        if response['role'] == 0:
+            return jsonify({"error": "Not authorized."}), 403
     
     response, status = updateProjectApproval(projectid, 1)
     return jsonify(response), status
 
 @app.route('/api/deny/<int:projectid>', methods=['POST'])
 def denyProject(projectid):
-    user = session.get("userID")
+    user = session.get("slackID")
     if not user:
         return jsonify({"error": "You must be logged in to deny a project."}), 401
     
-    reviewers = os.getenv("REVIEWERS")
-    if user not in reviewers:
-        return jsonify({"error": "Not authorized."}), 403
+    response, status = getProfile(slackid=user)
+    if status == 200:
+        if response['role'] == 0:
+            return jsonify({"error": "Not authorized."}), 403
     
-    response, status = updateProjectApproval(projectid, -1)
+    data = request.get_json()
+    denyMessage = data.get("denyMessage", "") if data else ""
+    
+    response, status = updateProjectApproval(projectid, -1, denyMessage)
     return jsonify(response), status
 
 
