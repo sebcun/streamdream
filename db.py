@@ -68,6 +68,7 @@ def initDb():
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     slack_id TEXT NOT NULL UNIQUE,
                     email TEXT,
+                    name TEXT,
                     avatar TEXT,
                     role INTEGER NOT NULL DEFAULT 0,
                     balance INTEGER NOT NULL DEFAULT 0,
@@ -76,6 +77,7 @@ def initDb():
                 )''')
 
     try:
+        conn.execute('ALTER TABLE profiles ADD COLUMN name TEXT')
         conn.execute('ALTER TABLE projects ADD COLUMN reviewer TEXT')
         conn.execute('ALTER TABLE projects ADD COLUMN deny_message TEXT')
     except sqlite3.OperationalError:
@@ -174,7 +176,7 @@ def updateProjectApproval(projectid, approved, reviewer, denyMessage=None):
     conn.close()
     return {"message": "Project approval update."}, 200
 
-def createOrUpdateProfile(slackid, email=None, avatar=None, role=None, balance=None):
+def createOrUpdateProfile(slackid, email=None, name=None, avatar=None, role=None, balance=None):
     conn = getDbConnection()
 
     existing = conn.execute('SELECT id FROM profiles WHERE slack_id = ?', (slackid,)).fetchone()
@@ -185,6 +187,9 @@ def createOrUpdateProfile(slackid, email=None, avatar=None, role=None, balance=N
         if email is not None:
             set_parts.append('email = ?')
             params.append(email)
+        if name is not None:
+            set_parts.append('name = ?')
+            params.append(name)
         if avatar is not None:
             set_parts.append('avatar = ?')
             params.append(avatar)
@@ -211,12 +216,12 @@ def getProfile(userid=None, slackid=None):
     
     conn = getDbConnection()
     if userid:
-        profile = conn.execute('SELECT id, slack_id, email, avatar, role, balance, created_at, updated_at FROM profiles WHERE id = ?', (userid,)).fetchone()
+        profile = conn.execute('SELECT id, slack_id, email, name, avatar, role, balance, created_at, updated_at FROM profiles WHERE id = ?', (userid,)).fetchone()
     else:
-        profile = conn.execute('SELECT id, slack_id, email, avatar, role, balance, created_at, updated_at FROM profiles WHERE slack_id = ?', (slackid,)).fetchone()
+        profile = conn.execute('SELECT id, slack_id, email, name, avatar, role, balance, created_at, updated_at FROM profiles WHERE slack_id = ?', (slackid,)).fetchone()
     conn.close()
 
     if profile:
-        return {'userid': profile[0], 'slack_id': profile[1], 'email': profile[2], 'avatar': profile[3], 'role': profile[4], 'balance': profile[5], 'created_at': profile[6], 'updated_at': profile[6]}, 200
+        return {'userid': profile[0], 'slack_id': profile[1], 'email': profile[2], 'name': profile[3], 'avatar': profile[4], 'role': profile[5], 'balance': profile[6], 'created_at': profile[7], 'updated_at': profile[8]}, 200
     
     return {"error": "User not found."}, 404

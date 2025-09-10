@@ -84,7 +84,7 @@ def slackCallback():
 
     session["slackID"] = userInfo["sub"]
 
-    createOrUpdateProfile(userInfo["sub"], userInfo["email"], userInfo["picture"])
+    createOrUpdateProfile(userInfo["sub"], userInfo["email"], userInfo["given_name"], userInfo["picture"])
 
     return redirect(url_for('index'))
 

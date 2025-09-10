@@ -51,13 +51,21 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       toReview.forEach((project) => {
-        const card = document.createElement("div");
-        card.classList.add("card");
-        card.onclick = () => {
-          openModalHTML(
-            project.title,
-            `
-              <span><i class="bi bi-stopwatch-fill"></i> ${project.hackatime_time} <i class="bi bi-person-fill" style="margin-left:10px"></i> @${project.author}</span>
+        fetch(`/api/user/${project.author}`)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Network response error");
+            }
+            return response.json();
+          })
+          .then((data) => {
+            const card = document.createElement("div");
+            card.classList.add("card");
+            card.onclick = () => {
+              openModalHTML(
+                project.title,
+                `
+              <span><i class="bi bi-stopwatch-fill"></i> ${project.hackatime_time} <i class="bi bi-person-fill" style="margin-left:10px"></i> <a href="https://hackclub.slack.com/team/${project.author}" target="_blank">@${data.name}</a></span>
               <p>${project.description}</p>
               <button class="button" onclick="window.open('${project.demo_link}', '_blank');">Demo <i class="bi bi-box-arrow-up-right"></i></button>
               <button class="button" onclick="window.open('${project.github_link}', '_blank');" style="margin-left:10px">Github <i class="bi bi-box-arrow-up-right"></i></button>
@@ -65,93 +73,112 @@ document.addEventListener("DOMContentLoaded", function () {
               <button class="button" onclick="confirmDenyProject(${project.id}, '${project.title}');" style="margin-left:10px">Deny</button>
               <button class="button" onclick="closeModal()" style="margin-left:10px; margin-top: 10px">Close</button>
             `
-          );
-        };
+              );
+            };
 
-        const displayTitle =
-          project.title.length > 75
-            ? project.title.slice(0, 75) + "..."
-            : project.title;
+            const displayTitle =
+              project.title.length > 75
+                ? project.title.slice(0, 75) + "..."
+                : project.title;
 
-        const displayDescription =
-          project.description.length > 30
-            ? project.description.slice(0, 30) + "..."
-            : project.description;
+            const displayDescription =
+              project.description.length > 30
+                ? project.description.slice(0, 30) + "..."
+                : project.description;
 
-        card.innerHTML = `
+            card.innerHTML = `
             <h2>${displayTitle}</h2>
             <p>${displayDescription}</p>`;
 
-        toReviewContainer.appendChild(card);
+            toReviewContainer.appendChild(card);
+          });
       });
 
       approved.forEach((project) => {
-        const card = document.createElement("div");
-        card.classList.add("card");
-        card.onclick = () => {
-          console.log(project);
-          openModalHTML(
-            project.title,
-            `
-              <span><i class="bi bi-stopwatch-fill"></i> ${project.hackatime_time} <i class="bi bi-person-fill" style="margin-left:10px"></i> @${project.author}</span>
+        fetch(`/api/user/${project.author}`)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Network response error");
+            }
+            return response.json();
+          })
+          .then((data) => {
+            const card = document.createElement("div");
+            card.classList.add("card");
+            card.onclick = () => {
+              console.log(project);
+              openModalHTML(
+                project.title,
+                `
+              <span><i class="bi bi-stopwatch-fill"></i> ${project.hackatime_time} <i class="bi bi-person-fill" style="margin-left:10px"></i> <a href="https://hackclub.slack.com/team/${project.author}" target="_blank">@${data.name}</a></span>
               <p>${project.description}</p>
               <small>Approved By: @${project.reviewer}</small><br>
               <button class="button" onclick="window.open('${project.demo_link}', '_blank');">Demo <i class="bi bi-box-arrow-up-right"></i></button>
               <button class="button" onclick="window.open('${project.github_link}', '_blank');" style="margin-left:10px">Github <i class="bi bi-box-arrow-up-right"></i></button>
               <button class="button" onclick="closeModal()" style="margin-left:10px; margin-top: 10px">Close</button>
             `
-          );
-        };
+              );
+            };
 
-        const displayTitle =
-          project.title.length > 75
-            ? project.title.slice(0, 75) + "..."
-            : project.title;
+            const displayTitle =
+              project.title.length > 75
+                ? project.title.slice(0, 75) + "..."
+                : project.title;
 
-        const displayDescription =
-          project.description.length > 30
-            ? project.description.slice(0, 30) + "..."
-            : project.description;
+            const displayDescription =
+              project.description.length > 30
+                ? project.description.slice(0, 30) + "..."
+                : project.description;
 
-        card.innerHTML = `
+            card.innerHTML = `
             <h2>${displayTitle}</h2>
             <p>${displayDescription}</p>`;
 
-        approvedContainer.appendChild(card);
+            approvedContainer.appendChild(card);
+          });
       });
 
       denied.forEach((project) => {
-        const card = document.createElement("div");
-        card.classList.add("card");
-        card.onclick = () => {
-          openModalHTML(
-            project.title,
-            `
-              <span><i class="bi bi-stopwatch-fill"></i> ${project.hackatime_time} <i class="bi bi-person-fill" style="margin-left:10px"></i> @${project.author}</span>
+        fetch(`/api/user/${project.author}`)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Network response error");
+            }
+            return response.json();
+          })
+          .then((data) => {
+            const card = document.createElement("div");
+            card.classList.add("card");
+            card.onclick = () => {
+              openModalHTML(
+                project.title,
+                `
+              <span><i class="bi bi-stopwatch-fill"></i> ${project.hackatime_time} <i class="bi bi-person-fill" style="margin-left:10px"></i> <a href="https://hackclub.slack.com/team/${project.author}" target="_blank">@${data.name}</a></span>
               <p>${project.description}</p>
               <small>Denied By: @${project.reviewer} for "${project.deny_message}"</small><br>
               <button class="button" onclick="window.open('${project.demo_link}', '_blank');">Demo <i class="bi bi-box-arrow-up-right"></i></button>
               <button class="button" onclick="window.open('${project.github_link}', '_blank');" style="margin-left:10px">Github <i class="bi bi-box-arrow-up-right"></i></button>
               <button class="button" onclick="closeModal()" style="margin-left:10px; margin-top: 10px">Close</button>
             `
-          );
-        };
+              );
+            };
 
-        const displayTitle =
-          project.title.length > 75
-            ? project.title.slice(0, 75) + "..."
-            : project.title;
+            const displayTitle =
+              project.title.length > 75
+                ? project.title.slice(0, 75) + "..."
+                : project.title;
 
-        const displayDescription =
-          project.description.length > 30
-            ? project.description.slice(0, 30) + "..."
-            : project.description;
+            const displayDescription =
+              project.description.length > 30
+                ? project.description.slice(0, 30) + "..."
+                : project.description;
 
-        card.innerHTML = `
+            card.innerHTML = `
             <h2>${displayTitle}</h2>
             <p>${displayDescription}</p>`;
 
-        deniedContainer.appendChild(card);
+            deniedContainer.appendChild(card);
+          });
       });
     });
 });
