@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request, render_template, redirect, session, url_for
 from db import getFAQS, initDb, createFAQ, getRewards, createReward, getProjects, getRules, createRule, createProject, updateProjectApproval, createOrUpdateProfile, getProfile
-import requests, os
+import requests, os,random
 from dotenv import load_dotenv
 load_dotenv()
 app = Flask(__name__)
@@ -200,6 +200,60 @@ def reviewerAPI(userid):
 
     
     response, status = createOrUpdateProfile(slackid=userid, role=reviewerStatus)
+    return jsonify(response), status
+
+@app.route('/api/createfaq', methods=['POST'])
+def createFAQAPI():
+    user = session.get("slackID")
+    if not user:
+        return jsonify({"error": "You must be logged in to submit a project."}), 401
+    
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Invalid request data."}), 400
+    
+    response, status = getProfile(slackid=user)
+    if status == 200:
+        if response['role'] != 1:
+            return jsonify({"error": "Not authorized."}), 403
+    
+    title = data.get("faqTitle")
+    description = data.get("faqDescription")
+    
+    if not all([title, description]):
+        return jsonify({"error": "All fields are required."}), 400
+    
+    colors = ["red", "orange", "yellow", "green", "blue", "purple", ""]
+    color = random.choice(colors)
+    
+    response, status = createFAQ(title, description, color)  
+    return jsonify(response), status
+
+@app.route('/api/createRule', methods=['POST'])
+def createRuleAPI():
+    user = session.get("slackID")
+    if not user:
+        return jsonify({"error": "You must be logged in to submit a project."}), 401
+    
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Invalid request data."}), 400
+    
+    response, status = getProfile(slackid=user)
+    if status == 200:
+        if response['role'] != 1:
+            return jsonify({"error": "Not authorized."}), 403
+    
+    title = data.get("ruleTitle")
+    description = data.get("ruleDescription")
+    
+    if not all([title, description]):
+        return jsonify({"error": "All fields are required."}), 400
+    
+    colors = ["red", "orange", "yellow", "green", "blue", "purple", ""]
+    color = random.choice(colors)
+    
+    response, status = createRule(title, description, color)  
     return jsonify(response), status
 
 if __name__ == "__main__":
