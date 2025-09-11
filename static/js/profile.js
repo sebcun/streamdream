@@ -14,11 +14,21 @@ document.addEventListener("DOMContentLoaded", function () {
     })
     .then((data) => {
       if (!data) return;
-      if (data["role"] != 0) {
+      if (data["role"] === -1 || data["role"] === 1) {
         const reviewerA = document.createElement("a");
         reviewerA.textContent = "Reviewer";
         reviewerA.href = "/reviewer";
         profileDropdown.appendChild(reviewerA);
+        if (data["role"] === 1) {
+          const manageA = document.createElement("a");
+          manageA.textContent = "Manage";
+          manageA.href = "";
+          manageA.onclick = function (e) {
+            e.preventDefault();
+            showManage();
+          };
+          profileDropdown.appendChild(manageA);
+        }
       }
       const logoutA = document.createElement("a");
       logoutA.textContent = "Logout";

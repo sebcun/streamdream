@@ -8,7 +8,7 @@ app.secret_key=os.getenv('SECRET_KEY', "YourSecretKey")
 
 SLACK_CLIENT_ID = "2210535565.9480843134949"
 SLACK_CLIENT_SECRET = "935a8f5c810af9b8384a187eae76667c"
-SLACK_REDIRECT_URI = "https://9fc8b4e9c214.ngrok-free.app/slack/callback"
+SLACK_REDIRECT_URI = "https://amazing-earwig-reliably.ngrok-free.app/slack/callback"
 
 initDb()
 
@@ -137,7 +137,7 @@ def userAPI(userid):
                 response, status = getProfile(slackid=userid)
                 return response, status
         
-    response, status = getProfile(slackid=user)
+    response, status = getProfile(slackid=userid)
     response.pop('email', None)
     return jsonify(response), status
         
@@ -173,6 +173,34 @@ def denyProject(projectid):
     response, status = updateProjectApproval(projectid, -1, user, denyMessage)
     return jsonify(response), status
 
+@app.route('/api/reviewer/<userid>', methods=['POST'])
+def reviewerAPI(userid):
+
+    user = session.get("slackID")
+    if not user:
+        return jsonify({"error": "You must be logged in to edit a users reviewer status."}), 401
+    
+    response, status = getProfile(slackid=user)
+    if status == 200:
+        if response['role'] != 1:
+            return jsonify({"error": "Not authorized."}), 403
+    
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Invalid request data."}), 400
+    
+    reviewerStatus = data.get("reviewerStatus")
+
+    if not reviewerStatus:
+        reviewerStatus = 0
+
+    response, status = getProfile(slackid=userid)
+    if status != 200:
+        return jsonify(response), status
+
+    
+    response, status = createOrUpdateProfile(slackid=userid, role=reviewerStatus)
+    return jsonify(response), status
 
 if __name__ == "__main__":
     app.run(debug=True)

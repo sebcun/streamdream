@@ -205,6 +205,9 @@ def createOrUpdateProfile(slackid, email=None, name=None, avatar=None, role=None
             query = f"UPDATE profiles SET {', '.join(set_parts)} WHERE slack_id = ?"
             params.append(slackid)
             conn.execute(query, tuple(params))  
+    else:
+        cursor = conn.execute('INSERT INTO profiles (slack_id, email, name, avatar) VALUES (?, ?, ?, ?)', 
+                          (slackid, email, name, avatar))
 
     conn.commit()
     conn.close()
