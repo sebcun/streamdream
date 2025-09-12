@@ -8,7 +8,7 @@ app.secret_key=os.getenv('SECRET_KEY', "YourSecretKey")
 
 SLACK_CLIENT_ID = os.getenv('SLACK_CLIENT_ID')
 SLACK_CLIENT_SECRET = os.getenv('SLACK_CLIENT_SECRET')
-SLACK_REDIRECT_URI = os.getenv('SLACK_REDIRECT_URI')
+SLACK_REDIRECT_URI = "https://amazing-earwig-reliably.ngrok-free.app/slack/callback"
 
 initDb(os.getenv('ADMIN_SLACK_ID'))
 
@@ -42,7 +42,16 @@ def getRulesAPI():
 
 @app.route('/api/projects', methods=['GET'])
 def getProjectsAPI():
+
+    user = session.get("slackID")
+    response, status = getProfile(slackid=user)
+    if status == 200:
+        if response['role'] != 0:
+                response, status = getProjects()
+                return jsonify(response), status
+    
     response, status = getProjects()
+    response = [project for project in response if project.get('author') == user or project.get('approved') == 1]
     return jsonify(response), status
 
 @app.route('/api/hackatime', methods=['GET'])
