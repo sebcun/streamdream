@@ -123,9 +123,12 @@ function openSubmitModal() {
           })
             .then((response) => {
               if (response.ok) {
-                showToast("Project submitted successfully!", {
-                  color: "success",
-                });
+                showToast(
+                  "Project has been submitted for review! Check it out on your profile page.",
+                  {
+                    color: "success",
+                  }
+                );
                 closeModal();
               } else {
                 return response.json().then((errorData) => {

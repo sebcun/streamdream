@@ -213,15 +213,18 @@ document.addEventListener("DOMContentLoaded", function () {
           orderData.forEach((order) => {
             const card = document.createElement("div");
             card.classList.add("card");
-            card.onclick = () => {
-              let statusText = "PENDING";
-              const statusValue = Number(order.status);
-              if (statusValue === 1) {
-                statusText = "SHIPPED";
-              } else if (statusValue === -1) {
-                statusText = "CANCELLED";
-              }
 
+            let statusText = "PENDING";
+            const statusValue = Number(order.status);
+            if (statusValue === 1) {
+              card.classList.add("green");
+              statusText = "SHIPPED";
+            } else if (statusValue === -1) {
+              card.classList.add("red");
+              statusText = "CANCELLED";
+            }
+
+            card.onclick = () => {
               openModalHTML(
                 order.item_name,
                 `

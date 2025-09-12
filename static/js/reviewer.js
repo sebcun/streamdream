@@ -1,7 +1,13 @@
-document.addEventListener("DOMContentLoaded", function () {
-  const toReviewContainer = document.getElementById("toReviewContainer");
-  const approvedContainer = document.getElementById("approvedContainer");
-  const deniedContainer = document.getElementById("deniedContainer");
+const toReviewContainer = document.getElementById("toReviewContainer");
+const approvedContainer = document.getElementById("approvedContainer");
+const deniedContainer = document.getElementById("deniedContainer");
+
+loadProjects();
+
+function loadProjects() {
+  toReviewContainer.innerHTML = "";
+  approvedContainer.innerHTML = "";
+  deniedContainer.innerHTML = "";
 
   fetch("/api/projects")
     .then((response) => {
@@ -181,8 +187,7 @@ document.addEventListener("DOMContentLoaded", function () {
           });
       });
     });
-});
-
+}
 function approveProject(id) {
   fetch(`/api/approve/${id}`, { method: "POST" })
     .then((response) => response.json())
@@ -193,6 +198,7 @@ function approveProject(id) {
       } else {
         showToast(data.error || "Error approving project.", { color: "error" });
       }
+      loadProjects();
     })
     .catch((error) => {
       console.error("Approval error:", error);
@@ -235,6 +241,7 @@ function confirmDenyProject(id, title) {
         } else {
           showToast(data.error || "Error denying project.", { color: "error" });
         }
+        loadProjects();
       })
       .catch((error) => {
         console.error("Approval error:", error);
