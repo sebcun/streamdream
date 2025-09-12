@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request, render_template, redirect, session, url_for
-from db import getFAQS, initDb, createFAQ, getRewards, createReward, getProjects, getRules, createRule, createProject, updateProjectApproval, createOrUpdateProfile, getProfile, createOrder, getOrders
+from db import getFAQS, initDb, createFAQ, getRewards, createReward, getProjects, getRules, createRule, createProject, updateProjectApproval, createOrUpdateProfile, getProfile, createOrder, getOrders, updateOrderStatus
 import requests, os,random
 from dotenv import load_dotenv
 load_dotenv()
@@ -241,6 +241,31 @@ def reviewerAPI(userid):
     
     response, status = createOrUpdateProfile(slackid=userid, role=reviewerStatus)
     return jsonify(response), status
+
+@app.route('/api/order/<orderid>', methods=['POST'])
+def orderAPI(orderid):
+
+    user = session.get("slackID")
+    if not user:
+        return jsonify({"error": "You must be logged in to edit an orders status."}), 401
+    
+    response, status = getProfile(slackid=user)
+    if status == 200:
+        if response['role'] != 1:
+            return jsonify({"error": "Not authorized."}), 403
+        
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Invalid request data."}), 400
+    
+    orderStatus = data.get("orderStatus")
+
+    if not orderStatus:
+        orderStatus = 0
+    
+    response, status = updateOrderStatus(orderid, orderStatus)
+    return jsonify(response), status
+
 
 @app.route('/api/createfaq', methods=['POST'])
 def createFAQAPI():
