@@ -69,6 +69,7 @@ def initDb(adminid):
                     slack_id TEXT NOT NULL UNIQUE,
                     email TEXT,
                     name TEXT,
+                    full_name TEXT,
                     avatar TEXT,
                     role INTEGER NOT NULL DEFAULT 0,
                     balance INTEGER NOT NULL DEFAULT 0,
@@ -91,11 +92,14 @@ def initDb(adminid):
                     state TEXT NOT NULL,
                     zip TEXT NOT NULL,
                     country TEXT NOT NULL,
+                    status INTEGER NOT NULL DEFAULT 0,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )''')
 
     try:
+        conn.execute('ALTER TABLE profiles ADD COLUMN full_name TEXT')
+        conn.execute('ALTER TABLE orders ADD COLUMN status TEXT')
         conn.execute('ALTER TABLE profiles ADD COLUMN name TEXT')
         conn.execute('ALTER TABLE projects ADD COLUMN reviewer TEXT')
         conn.execute('ALTER TABLE projects ADD COLUMN deny_message TEXT')
@@ -129,6 +133,12 @@ def getProjects():
     projects = conn.execute('SELECT id, title, description, author, hackatime_project, hackatime_time, demo_link, github_link, image, approved, deny_message, reviewer, created_at FROM projects').fetchall()
     conn.close()
     return [{'id': row[0], 'title': row[1], 'description': row[2], 'author': row[3], 'hackatime_project': row[4], 'hackatime_time': row[5], 'demo_link': row[6], 'github_link': row[7], 'image': row[8], 'approved': row[9], 'deny_message': row[10], 'reviewer': row[11], 'created_at': row[12]} for row in projects], 200
+
+def getOrders():
+    conn = getDbConnection()
+    orders = conn.execute('SELECT id, item_id, item_name, slack_id, full_name, email, phone, address, address_two, city, state, zip, country, created_at, updated_at, status FROM orders').fetchall()
+    conn.close()
+    return [{'id': row[0], 'item_id': row[1], 'item_name': row[2], 'slack_id': row[3], 'full_name': row[4], 'email': row[5], 'phone': row[6], 'address': row[7], 'address_two': row[8], 'city': row[9], 'state': row[10], 'zip': row[11], 'country': row[12], 'created_at': row[13], 'updated_at': row[14], 'status': row[15]} for row in orders], 200
     
 def createFAQ(question, answer, color=''):
     if not question or not answer:

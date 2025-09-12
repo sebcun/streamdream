@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request, render_template, redirect, session, url_for
-from db import getFAQS, initDb, createFAQ, getRewards, createReward, getProjects, getRules, createRule, createProject, updateProjectApproval, createOrUpdateProfile, getProfile, createOrder
+from db import getFAQS, initDb, createFAQ, getRewards, createReward, getProjects, getRules, createRule, createProject, updateProjectApproval, createOrUpdateProfile, getProfile, createOrder, getOrders
 import requests, os,random
 from dotenv import load_dotenv
 load_dotenv()
@@ -60,6 +60,20 @@ def getProjectsAPI():
     
     response, status = getProjects()
     response = [project for project in response if project.get('author') == user or project.get('approved') == 1]
+    return jsonify(response), status
+
+@app.route('/api/orders', methods=['GET'])
+def getOrdersAPI():
+
+    user = session.get('slackID')
+    response, status = getProfile(slackid=user)
+    if status == 200:
+        if response['role'] == 1:
+            response,status = getOrders()
+            return jsonify(response), status
+    
+    response, status = getOrders()
+    response = [order for order in response if order.get('slack_id') == user]
     return jsonify(response), status
 
 @app.route('/api/hackatime', methods=['GET'])
