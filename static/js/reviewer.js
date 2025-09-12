@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 <p></p>
               `;
 
-        toReviewContainer.appendChild(card);
+        approvedContainer.appendChild(card);
       }
 
       denied = projectData.filter((project) => project.approved === -1);
@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 <p></p>
               `;
 
-        toReviewContainer.appendChild(card);
+        deniedContainer.appendChild(card);
       }
 
       toReview.forEach((project) => {

@@ -1,0 +1,39 @@
+{% extends 'base.html' %} {% block title %}Profile{% endblock %} {% block styles
+%}<link rel="stylesheet" href="/static/css/index.css" /><link
+  rel="stylesheet"
+  href="/static/css/submit.css"
+/>
+{% endblock %} {% block contents %}
+
+<div class="category">
+  <h1>My Approved Projects</h1>
+  <div class="cards" id="myApprovedContainer"></div>
+</div>
+
+<div class="category">
+  <h1>My Denied Projects</h1>
+  <div class="cards" id="myDeniedContainer"></div>
+</div>
+
+<div class="category">
+  <h1>My Pending Review Projects</h1>
+  <div class="cards" id="myPendingReviewContainer"></div>
+</div>
+
+<div class="category">
+  <h1>My Orders</h1>
+  <div class="cards" id="myOrderContainer"></div>
+</div>
+
+<div class="hero extralongggggg" id="submit">
+  <h1>Ready to submit?</h1>
+  <p>If you think you are ready to submit, feel free to submit now!</p>
+  <button class="button" onclick="openSubmitChecklist()" id="submit-start-btn">
+    This YSWS hasn't started. This is just for beta testing purposes :)
+  </button>
+</div>
+
+{% endblock %} {% block scripts %}
+<script src="/static/js/myprofile.js"></script>
+<script src="/static/js/submit.js"></script>
+{% endblock %}

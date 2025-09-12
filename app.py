@@ -25,6 +25,14 @@ def reviewer():
                 return render_template('reviewer.html')
     return redirect(url_for('index'))
 
+@app.route('/profile')
+def profile():
+    user = session.get("slackID")
+    response, status = getProfile(slackid=user)
+    if status == 200:
+            return render_template('myprofile.html')
+    return redirect(url_for('index'))
+
 @app.route('/api/faqs', methods=['GET'])
 def getFAQsAPI():
     response, status = getFAQS()

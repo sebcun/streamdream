@@ -20,6 +20,7 @@ document.addEventListener("DOMContentLoaded", function () {
         reviewerA.href = "/reviewer";
         profileDropdown.appendChild(reviewerA);
         if (data["role"] === 1) {
+          console.log("hello");
           const manageA = document.createElement("a");
           manageA.textContent = "Manage";
           manageA.href = "";
@@ -29,25 +30,33 @@ document.addEventListener("DOMContentLoaded", function () {
           };
           profileDropdown.appendChild(manageA);
 
-          const faqCard = document.createElement("div");
-          faqCard.classList.add("card");
-          faqCard.onclick = () => createNewFAQ();
-          faqCard.innerHTML = `<h2>Create a new FAQ</h2>`;
-          document.getElementById("faqContainer").appendChild(faqCard);
+          if (document.getElementById("faqContainer")) {
+            const faqCard = document.createElement("div");
+            faqCard.classList.add("card");
+            faqCard.onclick = () => createNewFAQ();
+            faqCard.innerHTML = `<h2>Create a new FAQ</h2>`;
+            document.getElementById("faqContainer").appendChild(faqCard);
 
-          const ruleCard = document.createElement("div");
-          ruleCard.classList.add("card");
-          ruleCard.onclick = () => createNewRule();
-          ruleCard.innerHTML = `<h2>Create a new Rule</h2>`;
-          document.getElementById("rulesContainer").appendChild(ruleCard);
+            const ruleCard = document.createElement("div");
+            ruleCard.classList.add("card");
+            ruleCard.onclick = () => createNewRule();
+            ruleCard.innerHTML = `<h2>Create a new Rule</h2>`;
+            document.getElementById("rulesContainer").appendChild(ruleCard);
 
-          const rewardCard = document.createElement("div");
-          rewardCard.classList.add("card");
-          rewardCard.onclick = () => createNewReward();
-          rewardCard.innerHTML = `<h2>Create a new Reward</h2>`;
-          document.getElementById("rewardContainer").appendChild(rewardCard);
+            const rewardCard = document.createElement("div");
+            rewardCard.classList.add("card");
+            rewardCard.onclick = () => createNewReward();
+            rewardCard.innerHTML = `<h2>Create a new Reward</h2>`;
+            document.getElementById("rewardContainer").appendChild(rewardCard);
+          }
         }
       }
+
+      const profileA = document.createElement("a");
+      profileA.textContent = "Profile";
+      profileA.href = "/profile";
+      profileDropdown.appendChild(profileA);
+
       const logoutA = document.createElement("a");
       logoutA.textContent = "Logout";
       logoutA.href = "/api/logout";
