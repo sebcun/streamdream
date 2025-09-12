@@ -209,6 +209,20 @@ def createOrder(itemid, itemPrice, itemName, slackid, fullName, email, phone, ad
 
     return {"message": "Order submitted successfully."}, 200
 
+def updateOrderStatus(orderid, status):
+    if not orderid or status not in [0, 1, -1]:
+        return {"error": "Invalid order ID or status."}, 400
+    
+    conn = getDbConnection()
+    cursor = conn.execute('UPDATE orders SET status = ? where id = ?', (status, orderid))
+    if cursor.rowcount == 0:
+        conn.close()
+        return {"error": "Order not found."}, 404
+    
+    conn.commit()
+    conn.close()
+    return {"message": "Order status updated."}, 200
+
 def updateProjectApproval(projectid, approved, reviewer, denyMessage=None):
     if not projectid or approved not in [0, 1, -1] or not reviewer:
         return {"error": "Invalid project ID, approval status, or reviewer not supplied."}, 400
