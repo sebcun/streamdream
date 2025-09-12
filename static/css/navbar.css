@@ -30,7 +30,7 @@
   gap: 3rem;
 }
 
-.navbar a {
+.navbar .navbar-links a {
   float: left;
   display: block;
   color: white;
@@ -41,11 +41,11 @@
   transition: color 0.2s ease;
 }
 
-.navbar a:hover {
+.navbar .navbar-links a:hover {
   color: rgb(199, 199, 199);
 }
 
-.navbar a.active {
+.navbar .navbar-links a.active {
   font-weight: 800;
 }
 
@@ -87,10 +87,20 @@
   text-decoration: none;
   display: block;
   font-size: 16px;
+  float: none;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .profile-dropdown a:hover {
   color: rgb(199, 199, 199);
+}
+
+.profile-dropdown span {
+  display: block;
+  padding: 12px 16px;
+  font-size: 16px;
+  color: white;
 }
 
 .profile-dropdown.show {
@@ -162,7 +172,7 @@
     z-index: 1;
   }
 
-  .navbar.responsive a {
+  .navbar.responsive .navbar-links a {
     float: none;
     display: block;
     text-align: left;
