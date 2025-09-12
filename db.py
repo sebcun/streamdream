@@ -15,7 +15,7 @@ def getDbConnection():
     conn.row_factory = sqlite3.Row
     return conn
 
-def initDb():
+def initDb(adminid):
     conn = getDbConnection()
 
     # FAQs table
@@ -32,7 +32,7 @@ def initDb():
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         reward TEXT NOT NULL,
                         description TEXT NOT NULL,
-                        price TEXT NOT NULL,
+                        price INTEGER NOT NULL DEFAULT 0,
                         color TEXT NOT NULL,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     )''')
@@ -85,6 +85,7 @@ def initDb():
 
     conn.commit()
     conn.close()
+    createOrUpdateProfile(slackid=adminid, role=1)
 
 def getFAQS():
     conn = getDbConnection()

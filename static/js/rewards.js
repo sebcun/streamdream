@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
           card.onclick = () => openModal(reward.reward, reward.description);
           card.innerHTML = `
             <h2>${reward.reward}</h2>
-            <p>${reward.price}</p>`;
+            <p>${reward.price} Hours</p>`;
 
           rewardContainer.appendChild(card);
         });
