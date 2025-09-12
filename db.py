@@ -75,6 +75,25 @@ def initDb(adminid):
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )''')
+    
+    # Orders table
+    conn.execute('''CREATE TABLE IF NOT EXISTS orders (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    item_id INTEGER NOT NULL,
+                    item_name TEXT NOT NULL,
+                    slack_id TEXT NOT NULL,
+                    full_name TEXT NOT NULL,
+                    email TEXT NOT NULL,
+                    phone TEXT NOT NULL,
+                    address TEXT NOT NULL,
+                    address_two TEXT,
+                    city TEXT NOT NULL,
+                    state TEXT NOT NULL,
+                    zip TEXT NOT NULL,
+                    country TEXT NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )''')
 
     try:
         conn.execute('ALTER TABLE profiles ADD COLUMN name TEXT')
@@ -159,6 +178,26 @@ def createProject(title, description, author, hackatimeProject, hackatimeTime, d
     conn.close()
 
     return {"message": "Project submitted successfully.", "projectid": projectid}, 201
+
+def createOrder(itemid, itemPrice, itemName, slackid, fullName, email, phone, address, city, state, zip, country, addressTwo=''):
+    if not itemid or not itemName or not slackid or not fullName or not email or not phone or not address or not city or not state or not zip or not country:
+        return {"error": "All fields are required."}, 400
+    
+    response, status = getProfile(slackid=slackid)
+    if response.get("balance") < itemPrice:
+        return {"error": "You do not have enough hours for this."}, 400
+    
+    newBalance = response.get('balance') - itemPrice
+    
+    createOrUpdateProfile(slackid, balance=newBalance)
+    
+    conn = getDbConnection()
+    cursor = conn.execute('INSERT INTO orders (item_id, item_name, slack_id, full_name, email, phone, address, address_two, city, state, zip, country) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                          (itemid, itemName, slackid, fullName, email, phone, address, addressTwo, city, state, zip, country ))
+    conn.commit()
+    conn.close()
+
+    return {"message": "Order submitted successfully."}, 200
 
 def updateProjectApproval(projectid, approved, reviewer, denyMessage=None):
     if not projectid or approved not in [0, 1, -1] or not reviewer:

@@ -48,14 +48,20 @@ function showReward(id, title, description, hours) {
         `
         );
       } else {
-        const escapedTitle = title.replace(/"/g, '\\"');
-        const escapedDescription = description.replace(/"/g, '\\"');
-        const escapedData = JSON.stringify(data).replace(/"/g, '\\"');
+        const escapedTitle = title
+          .replace(/"/g, '\\"')
+          .replace(/'/g, "\\'")
+          .replace(/\n/g, "\\n");
+        const escapedData = JSON.stringify(data)
+          .replace(/"/g, '\\"')
+          .replace(/'/g, "\\'")
+          .replace(/\n/g, "\\n");
+
         openModalHTML(
           title,
           `
           <p>${description}</p>
-          <button class="button" onclick='purchaseReward("${escapedData}", ${id}, "${escapedTitle}", "${escapedDescription}", ${hours})' style="margin-left:10px">Order for ${hours} hours</button>
+          <button class="button" onclick='purchaseReward("${escapedData}", ${id}, "${escapedTitle}", ${hours})' style="margin-left:10px">Order for ${hours} hours</button>
           <button class="button" onclick="closeModal()" style="margin-left:10px">Close</button>
         `
         );
@@ -63,7 +69,7 @@ function showReward(id, title, description, hours) {
     });
 }
 
-function purchaseReward(userDataString, id, title, description, hours) {
+function purchaseReward(userDataString, id, title, hours) {
   const userData = JSON.parse(userDataString);
   console.log(userData);
   if (userData.balance >= hours) {
@@ -102,6 +108,47 @@ function purchaseReward(userDataString, id, title, description, hours) {
           </form>
         `
     );
+
+    document
+      .getElementById("submitOrderForm")
+      .addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData);
+
+        data.itemID = id;
+        data.itemPrice = hours;
+        data.itemName = title;
+
+        fetch("/api/submitorder", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        })
+          .then((response) => {
+            if (response.ok) {
+              showToast("Order submitted successfully!", {
+                color: "success",
+              });
+              closeModal();
+            } else {
+              return response.json().then((errorData) => {
+                showToast(errorData.error, {
+                  color: "error",
+                });
+
+                closeModal();
+              });
+            }
+          })
+          .catch((error) => {
+            console.error("Submission error:", error);
+            showToast("Network error. Please try again.", { color: "error" });
+          });
+      });
   } else {
     showToast("You do not have enough hours for this.", { color: "error" });
     closeModal();

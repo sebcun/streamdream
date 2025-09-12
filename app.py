@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request, render_template, redirect, session, url_for
-from db import getFAQS, initDb, createFAQ, getRewards, createReward, getProjects, getRules, createRule, createProject, updateProjectApproval, createOrUpdateProfile, getProfile
+from db import getFAQS, initDb, createFAQ, getRewards, createReward, getProjects, getRules, createRule, createProject, updateProjectApproval, createOrUpdateProfile, getProfile, createOrder
 import requests, os,random
 from dotenv import load_dotenv
 load_dotenv()
@@ -302,5 +302,36 @@ def createRewardAPI():
     response, status = createReward(title, description, time, color)
     return jsonify(response), status
 
+
+@app.route('/api/submitorder', methods=['POST'])
+def submitOrder():
+
+    user = session.get("slackID")
+    if not user:
+        return jsonify({"error": "You must be logged in to submit a project."}), 401
+    
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Invalid request data."}), 400
+    
+    itemid = data.get("itemID")
+    itemPrice = data.get("itemPrice")
+    itemName = data.get("itemName")
+    fullName = data.get("fullName")
+    email = data.get("email")
+    phone = data.get("phone")
+    address = data.get("address")
+    city = data.get("city")
+    state = data.get("state")
+    zip = data.get("zip")
+    country = data.get("country")
+    addressTwo = data.get("addressLine2")
+    
+    if not all([itemid, itemPrice, itemName, fullName, email, phone, address, city, state, zip, country]):
+        return jsonify({"error": "All fields are required."}), 400
+    
+    response, status = createOrder(itemid, itemPrice, itemName, user, fullName, email, phone, address, city, state, zip, country, addressTwo=addressTwo)
+    return jsonify(response), status
+    
 if __name__ == "__main__":
     app.run(debug=True)
