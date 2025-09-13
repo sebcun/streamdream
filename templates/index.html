@@ -61,13 +61,17 @@
   <h1>Rules</h1>
   <div class="cards" id="rulesContainer"></div>
 </div>
-
-<div class="hero extralongggggg" id="submit">
+<div class="hero" id="submit">
   <h1>Ready to submit?</h1>
   <p>If you think you are ready to submit, feel free to submit now!</p>
   <button class="button" onclick="openSubmitChecklist()" id="submit-start-btn">
     This YSWS hasn't started. This is just for beta testing purposes :)
   </button>
+</div>
+<div class="hero extralongggggg" id="ideas">
+  <h1>Need an idea?</h1>
+  <p>Use our idea generator!</p>
+  <button class="button" onclick="generateIdea()">Give me one!</button>
 </div>
 
 {% endblock %} {% block scripts %}
@@ -77,4 +81,5 @@
 <script src="/static/js/projects.js"></script>
 <script src="/static/js/submit.js"></script>
 <script src="/static/js/loading.js"></script>
+<script src="/static/js/ideas.js"></script>
 {% endblock %}

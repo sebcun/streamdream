@@ -1,5 +1,6 @@
 const loading = document.getElementById("loadingContainer");
 
+// Disable scrolls, this was AI as I couldnt figure it out so not much I can say about this!
 let _scrollY = 0;
 let _supportsPassive = false;
 

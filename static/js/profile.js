@@ -3,6 +3,7 @@ const profileDropdown = document.getElementById("profile-dropdown");
 document.addEventListener("DOMContentLoaded", function () {
   fetch("/api/me")
     .then((response) => {
+      // Not logged in
       if (!response.ok) {
         const toggleLoadingA = document.createElement("a");
         toggleLoadingA.textContent = "Toggle Loading Screen";
@@ -24,6 +25,8 @@ document.addEventListener("DOMContentLoaded", function () {
     .then((data) => {
       if (!data) return;
 
+      // Logged in
+
       const toggleLoadingA = document.createElement("a");
       toggleLoadingA.textContent = "Toggle Loading Screen";
       toggleLoadingA.onclick = () => {
@@ -32,6 +35,7 @@ document.addEventListener("DOMContentLoaded", function () {
       toggleLoadingA.style.display = "block";
       profileDropdown.appendChild(toggleLoadingA);
 
+      // If the role is reviewer or admin, show reviewer
       if (data["role"] === -1 || data["role"] === 1) {
         const reviewerA = document.createElement("a");
         reviewerA.textContent = "Reviewer";
@@ -39,6 +43,7 @@ document.addEventListener("DOMContentLoaded", function () {
         reviewerA.style.display = "block";
         profileDropdown.appendChild(reviewerA);
 
+        // If role is admin show admin
         if (data["role"] === 1) {
           const adminA = document.createElement("a");
           adminA.textContent = "Admin";
@@ -48,6 +53,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       }
 
+      // SHow any others
       const profileA = document.createElement("a");
       profileA.textContent = "Profile";
       profileA.href = "/profile";
@@ -67,6 +73,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
+// Toggle whether to show loading screen or not :)
 function toggleLoading() {
   const current = localStorage.getItem("loading");
 

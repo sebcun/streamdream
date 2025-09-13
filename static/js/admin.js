@@ -31,6 +31,13 @@ reviewerManageCard.onclick = () => manageReviewers();
 reviewerManageCard.innerHTML = `<h2>Manage Reviewers</h2>`;
 adminActionsContainer.appendChild(reviewerManageCard);
 
+//    Create Idea
+const ideaCard = document.createElement("div");
+ideaCard.classList.add("card");
+ideaCard.onclick = () => createNewIdea();
+ideaCard.innerHTML = `<h2>Create a new Idea</h2>`;
+adminActionsContainer.appendChild(ideaCard);
+
 // Load Orders
 loadOrders();
 
@@ -441,5 +448,65 @@ function markOrder(orderid, status) {
     .catch((error) => {
       console.log("Error updating order status:", error);
       showToast(error.message, { color: "error" });
+    });
+}
+
+// FUNCTION: Create new FAQ
+function createNewIdea() {
+  // Open Modal
+  openModalHTML(
+    "Create a new idea",
+    `
+      <form id="newIdeaForm" class="submit-form">
+        <label for="ideaTitle">Idea Title:</label>
+        <input type="text" id="ideaTitle" name="ideaTitle" required>
+
+        <label for="ideaDescription">Idea Description:</label>
+        <textarea id="ideaDescription" name="ideaDescription" required></textarea>
+
+        <div style="display: flex; flex-direction: row; gap: 10px; margin-top: 10px;">
+          <button type="submit" class="button">Create</button>
+          <button type="button" class="button" onclick="closeModal()">Cancel</button>
+        </div>
+      </form>
+    `
+  );
+
+  // Get Form and add event listener
+  document
+    .getElementById("newIdeaForm")
+    .addEventListener("submit", function (e) {
+      // cancel default form (so page doesnt refresh)
+      e.preventDefault();
+
+      // Get form data
+      const formData = new FormData(this);
+      const data = Object.fromEntries(formData);
+
+      // Complete POST request
+      fetch(`/api/createidea`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+        // Get response and data to return for status code
+        .then((response) => {
+          return response.json().then((data) => ({ response, data }));
+        })
+        .then(({ response, data }) => {
+          // If there is an error, throw it
+          if (data["error"]) {
+            throw new Error(`${response.status} | ${data["error"]}`);
+          }
+
+          // Success
+          showToast("Idea created!", { color: "success" });
+          closeModal();
+        })
+        // Catch any errors, show toast and log to console
+        .catch((error) => {
+          console.log("Error creating idea:", error);
+          showToast(error.message, { color: "error" });
+        });
     });
 }

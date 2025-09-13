@@ -1,26 +1,44 @@
 document.addEventListener("DOMContentLoaded", function () {
+  // Get all containers
   const toReviewContainer = document.getElementById("myPendingReviewContainer");
   const approvedContainer = document.getElementById("myApprovedContainer");
   const deniedContainer = document.getElementById("myDeniedContainer");
   const orderContainer = document.getElementById("myOrderContainer");
 
+  // Fetch me! This is to ensure only projects you created show
   fetch("/api/me")
+    // Get response and data to return for status code
     .then((response) => {
-      return response.json();
+      return response.json().then((data) => ({ response, data }));
     })
-    .then((data) => {
+    .then(({ response, data }) => {
+      // If there is an error throw it!
+      if (data["error"]) {
+        throw new Error(`${response.status} | ${data["error"]}`);
+      }
+
+      // Success
+
+      // First lets fetch projects
       fetch("/api/projects")
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Network response error");
-          }
-          return response.json();
+        // Get response and data to return for status code
+        .then((responseP) => {
+          return responseP.json().then((dataP) => ({ responseP, dataP }));
         })
-        .then((projectData) => {
-          projectData = projectData.filter(
-            (project) => project.author === data.slack_id
-          );
-          toReview = projectData.filter((project) => project.approved === 0);
+        .then(({ responseP, dataP }) => {
+          // If there is an error throw it...
+          if (dataP["error"]) {
+            throw new Error(`${responseP.status} | ${dataP["error"]}`);
+          }
+
+          // Success
+
+          // Change dataP so it is only projects the authed user made
+          dataP = dataP.filter((project) => project.author === data.slack_id);
+
+          // Get projects that status are 0 (to review)
+          toReview = dataP.filter((project) => project.approved === 0);
+          // If there are no projects to review, show that card.
           if (toReview.length == 0) {
             const card = document.createElement("div");
             card.classList.add("card");
@@ -32,7 +50,9 @@ document.addEventListener("DOMContentLoaded", function () {
             toReviewContainer.appendChild(card);
           }
 
-          approved = projectData.filter((project) => project.approved === 1);
+          // Get projects that status are 1 (approved)
+          approved = dataP.filter((project) => project.approved === 1);
+          // If there are no projects that are approved, show that card.
           if (approved.length == 0) {
             const card = document.createElement("div");
             card.classList.add("card");
@@ -45,7 +65,9 @@ document.addEventListener("DOMContentLoaded", function () {
             approvedContainer.appendChild(card);
           }
 
-          denied = projectData.filter((project) => project.approved === -1);
+          // Get projects that status are -1 (denied)
+          denied = dataP.filter((project) => project.approved === -1);
+          // If there are no projects that are denied, show that card.
           if (denied.length == 0) {
             const card = document.createElement("div");
             card.classList.add("card");
@@ -58,148 +80,37 @@ document.addEventListener("DOMContentLoaded", function () {
             deniedContainer.appendChild(card);
           }
 
-          toReview.forEach((project) => {
-            fetch(`/api/user/${project.author}`)
-              .then((response) => {
-                if (!response.ok) {
-                  throw new Error("Network response error");
-                }
-                return response.json();
-              })
-              .then((data) => {
-                const card = document.createElement("div");
-                card.classList.add("card");
-                card.onclick = () => {
-                  openModalHTML(
-                    project.title,
-                    `
-              <span><i class="bi bi-stopwatch-fill"></i> ${project.hackatime_time} <i class="bi bi-person-fill" style="margin-left:10px"></i> <a href="https://hackclub.slack.com/team/${project.author}" target="_blank">@${data.name}</a></span>
-              <p>${project.description}</p>
-              <button class="button" onclick="window.open('${project.demo_link}', '_blank');">Demo <i class="bi bi-box-arrow-up-right"></i></button>
-              <button class="button" onclick="window.open('${project.github_link}', '_blank');" style="margin-left:10px">Github <i class="bi bi-box-arrow-up-right"></i></button>
-              <button class="button" onclick="closeModal()" style="margin-left:10px; margin-top: 10px">Close</button>
-            `
-                  );
-                };
-
-                const displayTitle =
-                  project.title.length > 75
-                    ? project.title.slice(0, 75) + "..."
-                    : project.title;
-
-                const displayDescription =
-                  project.description.length > 30
-                    ? project.description.slice(0, 30) + "..."
-                    : project.description;
-
-                card.innerHTML = `
-            <h2>${displayTitle}</h2>
-            <p>${displayDescription}</p>`;
-
-                toReviewContainer.appendChild(card);
-              });
-          });
-
-          approved.forEach((project) => {
-            fetch(`/api/user/${project.author}`)
-              .then((response) => {
-                if (!response.ok) {
-                  throw new Error("Network response error");
-                }
-                return response.json();
-              })
-              .then((data) => {
-                const card = document.createElement("div");
-                card.classList.add("card");
-                card.onclick = () => {
-                  console.log(project);
-                  openModalHTML(
-                    project.title,
-                    `
-              <span><i class="bi bi-stopwatch-fill"></i> ${project.hackatime_time} <i class="bi bi-person-fill" style="margin-left:10px"></i> <a href="https://hackclub.slack.com/team/${project.author}" target="_blank">@${data.name}</a></span>
-              <p>${project.description}</p>
-              <small>Approved By: @${project.reviewer}</small><br>
-              <button class="button" onclick="window.open('${project.demo_link}', '_blank');">Demo <i class="bi bi-box-arrow-up-right"></i></button>
-              <button class="button" onclick="window.open('${project.github_link}', '_blank');" style="margin-left:10px">Github <i class="bi bi-box-arrow-up-right"></i></button>
-              <button class="button" onclick="closeModal()" style="margin-left:10px; margin-top: 10px">Close</button>
-            `
-                  );
-                };
-
-                const displayTitle =
-                  project.title.length > 75
-                    ? project.title.slice(0, 75) + "..."
-                    : project.title;
-
-                const displayDescription =
-                  project.description.length > 30
-                    ? project.description.slice(0, 30) + "..."
-                    : project.description;
-
-                card.innerHTML = `
-            <h2>${displayTitle}</h2>
-            <p>${displayDescription}</p>`;
-
-                approvedContainer.appendChild(card);
-              });
-          });
-
-          denied.forEach((project) => {
-            fetch(`/api/user/${project.author}`)
-              .then((response) => {
-                if (!response.ok) {
-                  throw new Error("Network response error");
-                }
-                return response.json();
-              })
-              .then((data) => {
-                const card = document.createElement("div");
-                card.classList.add("card");
-                card.onclick = () => {
-                  openModalHTML(
-                    project.title,
-                    `
-              <span><i class="bi bi-stopwatch-fill"></i> ${project.hackatime_time} <i class="bi bi-person-fill" style="margin-left:10px"></i> <a href="https://hackclub.slack.com/team/${project.author}" target="_blank">@${data.name}</a></span>
-              <p>${project.description}</p>
-              <small>Denied By: @${project.reviewer} for "${project.deny_message}"</small><br>
-              <button class="button" onclick="window.open('${project.demo_link}', '_blank');">Demo <i class="bi bi-box-arrow-up-right"></i></button>
-              <button class="button" onclick="window.open('${project.github_link}', '_blank');" style="margin-left:10px">Github <i class="bi bi-box-arrow-up-right"></i></button>
-              <button class="button" onclick="closeModal()" style="margin-left:10px; margin-top: 10px">Close</button>
-            `
-                  );
-                };
-
-                const displayTitle =
-                  project.title.length > 75
-                    ? project.title.slice(0, 75) + "..."
-                    : project.title;
-
-                const displayDescription =
-                  project.description.length > 30
-                    ? project.description.slice(0, 30) + "..."
-                    : project.description;
-
-                card.innerHTML = `
-            <h2>${displayTitle}</h2>
-            <p>${displayDescription}</p>`;
-
-                deniedContainer.appendChild(card);
-              });
-          });
+          createProjectCards(toReview, toReviewContainer);
+          createProjectCards(
+            approved,
+            approvedContainer,
+            (project) => `<small>Approved By: @${project.reviewer}</small><br>`
+          );
+          createProjectCards(
+            denied,
+            deniedContainer,
+            (project) =>
+              `<small>Denied By: @${project.reviewer} for "${project.deny_message}"</small><br>`
+          );
         });
 
+      // Now lets fetch orders!
       fetch("/api/orders")
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Network response error");
-          }
-          return response.json();
+        // Get response and data to return for status code
+        .then((responseO) => {
+          return responseO.json().then((dataO) => ({ responseO, dataO }));
         })
-        .then((orderData) => {
-          orderData = orderData.filter(
-            (order) => order.slack_id === data.slack_id
-          );
-          if (orderData.length == 0) {
+        .then(({ responseO, dataO }) => {
+          // If there is an error, throw it!
+          if (dataO["error"]) {
+            throw new Error(`${responseO.status} | ${dataO["error"]}`);
+          }
+
+          // Success
+          // Get orders where the userID = current userID
+          dataO = dataO.filter((order) => order.slack_id === data.slack_id);
+          // If there are no orders, show that Card!
+          if (dataO.length == 0) {
             const card = document.createElement("div");
             card.classList.add("card");
 
@@ -210,7 +121,8 @@ document.addEventListener("DOMContentLoaded", function () {
             orderContainer.appendChild(card);
           }
 
-          orderData.forEach((order) => {
+          // For each order
+          dataO.forEach((order) => {
             const card = document.createElement("div");
             card.classList.add("card");
 
@@ -281,6 +193,76 @@ document.addEventListener("DOMContentLoaded", function () {
 
             orderContainer.appendChild(card);
           });
+        })
+        .catch((error) => {
+          console.log("Error fetching orders:", error);
         });
+    })
+    .catch((error) => {
+      console.log("Error fetching profile:", error);
+      showToast(error.message, { color: "error" });
     });
 });
+
+function createProjectCards(projects, container, getModalExtra = () => "") {
+  // For each project
+  projects.forEach((project) => {
+    // First fetch the author so we can get their first name to dispaly
+    fetch(`/api/user/${project.author}`)
+      // Get response and data to return for status code
+      .then((response) => {
+        return response.json().then((data) => ({ response, data }));
+      })
+      .then(({ response, data }) => {
+        // If there is an error throw it
+        if (data["error"]) {
+          throw new Error(`${response.status} | ${data["error"]}`);
+        }
+
+        // Success
+        const card = document.createElement("div");
+        card.classList.add("card");
+        card.onclick = () => {
+          openModalHTML(
+            project.title,
+            `
+              <span><i class="bi bi-stopwatch-fill"></i> ${
+                project.hackatime_time
+              } <i class="bi bi-person-fill" style="margin-left:10px"></i> <a href="https://hackclub.slack.com/team/${
+              project.author
+            }" target="_blank">@${data.name}</a></span>
+              <p>${project.description}</p>
+              ${getModalExtra(project)}
+              <button class="button" onclick="window.open('${
+                project.demo_link
+              }', '_blank');">Demo <i class="bi bi-box-arrow-up-right"></i></button>
+              <button class="button" onclick="window.open('${
+                project.github_link
+              }', '_blank');" style="margin-left:10px">Github <i class="bi bi-box-arrow-up-right"></i></button>
+              <button class="button" onclick="closeModal()" style="margin-left:10px; margin-top: 10px">Close</button>
+            `
+          );
+        };
+
+        // Trim titles and descriptions so they arent TOO long <3
+        const displayTitle =
+          project.title.length > 75
+            ? project.title.slice(0, 75) + "..."
+            : project.title;
+
+        const displayDescription =
+          project.description.length > 30
+            ? project.description.slice(0, 30) + "..."
+            : project.description;
+
+        card.innerHTML = `
+          <h2>${displayTitle}</h2>
+          <p>${displayDescription}</p>`;
+
+        container.appendChild(card);
+      })
+      .catch((error) => {
+        console.log("Error fetching user:", error);
+      });
+  });
+}

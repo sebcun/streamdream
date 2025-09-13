@@ -96,6 +96,13 @@ def initDb(adminid):
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )''')
+    
+    # Ideas table
+    conn.execute('''CREATE TABLE IF NOT EXISTS ideas (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    title TEXT NOT NULL,
+                    description TEXT NOT NULL
+                )''')
 
     try:
         conn.execute('ALTER TABLE profiles ADD COLUMN full_name TEXT')
@@ -115,6 +122,12 @@ def getFAQS():
     faqs = conn.execute('SELECT id, question, answer, color, created_at FROM faqs').fetchall()
     conn.close()
     return [{'id': row[0], 'question': row[1], 'answer': row[2], 'color': row[3], 'created_at': row[4]} for row in faqs], 200
+
+def getIdeas():
+    conn = getDbConnection()
+    faqs = conn.execute('SELECT id, title, description FROM ideas').fetchall()
+    conn.close()
+    return [{'id': row[0], 'title': row[1], 'description': row[2]} for row in faqs], 200
 
 def getRewards():
     conn = getDbConnection()
@@ -151,6 +164,18 @@ def createFAQ(question, answer, color=''):
     conn.close()
 
     return {"message": "FAQ created successfully.", "faqid": faqid}, 201
+
+def createIdea(title, description):
+    if not title or not description:
+        return {"error": "Title and description are required."}, 400
+    
+    conn = getDbConnection()
+    cursor = conn.execute('INSERT INTO ideas (title, description) VALUES (?, ?)', (title, description))
+    ideaid = cursor.lastrowid
+    conn.commit()
+    conn.close()
+
+    return {"message": "Idea created successfully.", "ideaid": ideaid}, 201
     
 def createReward(reward, description, price, color=''):
     if not reward or not description or not price:

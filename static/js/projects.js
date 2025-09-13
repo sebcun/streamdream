@@ -1,15 +1,19 @@
 showcaseContainer = document.getElementById("showcaseContainer");
 
 document.addEventListener("DOMContentLoaded", function () {
+  // Just to make sure the showcase exist as this script may be included on another page
+
   if (showcaseContainer) {
     fetch("/api/projects")
       .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response error");
-        }
-        return response.json();
+        return response.json().then((data) => ({ response, data }));
       })
-      .then((data) => {
+      .then(({ response, data }) => {
+        // If there is an error throw that!!!
+        if (data["error"]) {
+          throw new Error(`${response.status} | ${data["error"]}`);
+        }
+
         data = data.filter((project) => project.approved === 1);
         if (data.length == 0) {
           const card = document.createElement("div");
@@ -72,6 +76,11 @@ document.addEventListener("DOMContentLoaded", function () {
               showcaseContainer.appendChild(card);
             });
         });
+      })
+      // Catch any errors, show toast and log to console
+      .catch((error) => {
+        console.log("Error fetching Projects:", error);
+        showToast(error.message, { color: "error" });
       });
   }
 });
