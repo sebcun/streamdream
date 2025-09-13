@@ -4,10 +4,18 @@ document.addEventListener("DOMContentLoaded", function () {
   fetch("/api/me")
     .then((response) => {
       if (!response.ok) {
+        const toggleLoadingA = document.createElement("a");
+        toggleLoadingA.textContent = "Toggle Loading Screen";
+        toggleLoadingA.onclick = () => {
+          toggleLoading();
+        };
+        toggleLoadingA.style.display = "block";
+        profileDropdown.appendChild(toggleLoadingA);
+
         const a = document.createElement("a");
         a.textContent = "Login with Slack";
         a.href = "/login";
-        a.style.display = "block"; // Ensure it's on its own line
+        a.style.display = "block";
         profileDropdown.appendChild(a);
         return;
       }
@@ -15,6 +23,15 @@ document.addEventListener("DOMContentLoaded", function () {
     })
     .then((data) => {
       if (!data) return;
+
+      const toggleLoadingA = document.createElement("a");
+      toggleLoadingA.textContent = "Toggle Loading Screen";
+      toggleLoadingA.onclick = () => {
+        toggleLoading();
+      };
+      toggleLoadingA.style.display = "block";
+      profileDropdown.appendChild(toggleLoadingA);
+
       if (data["role"] === -1 || data["role"] === 1) {
         const reviewerA = document.createElement("a");
         reviewerA.textContent = "Reviewer";
@@ -49,3 +66,17 @@ document.addEventListener("DOMContentLoaded", function () {
       profileDropdown.appendChild(logoutA);
     });
 });
+
+function toggleLoading() {
+  const current = localStorage.getItem("loading");
+
+  if (current) {
+    localStorage.removeItem("loading");
+    showToast("You will now see the loading screen.", { color: "success" });
+  } else {
+    localStorage.setItem("loading", true);
+    showToast("You will no longer see the loading screen.", {
+      color: "success",
+    });
+  }
+}
