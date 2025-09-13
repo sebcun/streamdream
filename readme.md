@@ -46,3 +46,33 @@ SLACK_CLIENT_SECRET=YOUR SLACK CLIENT SECRET
 SLACK_REDIRECT_URI=YOUR DOMAIN + /slack/callback EG: https://streamdream.sebcun.com/slack/callback
 ADMIN_SLACK_ID=YOUR SLACK ID EG: U0971C3C44D
 ```
+
+_To get your Slack stuff, follow the instructions below the setup_
+
+4. Run the app
+
+```
+py app.py
+```
+
+The website will be available on http://localhost:5000
+
+## Slack Auth Setup
+
+1. Head to https://api.slack.com/apps and login with Slack.
+2. Create a new app from Scratch, and pick Hack Club as the workspace
+3. On the main page of your app copy the client ID and secret and put in your env.
+4. Head to OAuth & Permissions tab, and add your redirect URL (it CANNOT be http eg localhost, if you are wanting to run it locally use a service like ngrok and put that url there)
+5. Done!
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+# Issues
+
+If you run into any issues or need support, please open an issue on the repo or reach out to me on slack :)
+
+# License
+
+This project is licensed under the MIT License - see [LICENSE] for details.
