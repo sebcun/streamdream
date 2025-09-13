@@ -1,7 +1,7 @@
 # Imports
 from flask import Flask, jsonify, request, render_template, redirect, session, url_for
 from db import getFAQS, initDb, createFAQ, getRewards, createReward, getProjects, getRules, createRule, createProject, updateProjectApproval, createOrUpdateProfile, getProfile, createOrder, getOrders, updateOrderStatus, getProject, getIdeas, createIdea
-import requests, os,random
+import requests, os, random, uuid
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
 
@@ -237,13 +237,16 @@ def submitProjectAPI():
     if '.' not in imageFile.filename or imageFile.filename.rsplit('.', 1)[1].lower() not in allowedExtensions:
         return jsonify({"error": "Invalid image file type."}), 400
     
+    # Generate unique file name
+    originalExtension = imageFile.filename.rsplit('.', 1)[1].lower()
+    uniqueFileName = f"{uuid.uuid4().hex}.{originalExtension}"
+    
     # Download the image
-    fileName = secure_filename(imageFile.filename)
     imagesDir = os.path.join(app.root_path, 'static', 'images')
     os.makedirs(imagesDir, exist_ok=True)
-    imagePath = os.path.join(imagesDir, fileName)
+    imagePath = os.path.join(imagesDir, uniqueFileName)
     imageFile.save(imagePath)
-    relativePath = f"static/images/{fileName}"
+    relativePath = f"static/images/{uniqueFileName}"
 
 
     # Check request data
@@ -286,8 +289,6 @@ def submitOrder():
     response, status = createOrder(itemid, itemPrice, itemName, user, fullName, email, phone, address, city, state, zip, country, addressTwo=addressTwo)
     return jsonify(response), status
 
-
-        
 # Reviewer APIs
 @app.route('/api/approve/<int:projectid>', methods=['POST'])
 def approveProject(projectid):

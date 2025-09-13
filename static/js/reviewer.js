@@ -2,13 +2,16 @@ const toReviewContainer = document.getElementById("toReviewContainer");
 const approvedContainer = document.getElementById("approvedContainer");
 const deniedContainer = document.getElementById("deniedContainer");
 
+// Initial load
 loadProjects();
 
 function loadProjects() {
+  // Set those to blank!
   toReviewContainer.innerHTML = "";
   approvedContainer.innerHTML = "";
   deniedContainer.innerHTML = "";
 
+  // Fetch projects
   fetch("/api/projects")
     .then((response) => {
       if (!response.ok) {
@@ -17,7 +20,9 @@ function loadProjects() {
       return response.json();
     })
     .then((projectData) => {
+      // Get projects to review
       toReview = projectData.filter((project) => project.approved === 0);
+      // If none to review, add a card
       if (toReview.length == 0) {
         const card = document.createElement("div");
         card.classList.add("card");
@@ -30,7 +35,9 @@ function loadProjects() {
         toReviewContainer.appendChild(card);
       }
 
+      // Get approved projects
       approved = projectData.filter((project) => project.approved === 1);
+      // If none, add a carrd
       if (approved.length == 0) {
         const card = document.createElement("div");
         card.classList.add("card");
@@ -43,7 +50,9 @@ function loadProjects() {
         approvedContainer.appendChild(card);
       }
 
+      // Get denied projects
       denied = projectData.filter((project) => project.approved === -1);
+      // If none add card
       if (denied.length == 0) {
         const card = document.createElement("div");
         card.classList.add("card");
@@ -56,6 +65,7 @@ function loadProjects() {
         deniedContainer.appendChild(card);
       }
 
+      // For each to review
       toReview.forEach((project) => {
         fetch(`/api/user/${project.author}`)
           .then((response) => {
@@ -65,9 +75,11 @@ function loadProjects() {
             return response.json();
           })
           .then((data) => {
+            // Add card
             const card = document.createElement("div");
             card.classList.add("card");
 
+            // Image
             if (project.image) {
               card.style.backgroundImage = `url(${project.image})`;
               card.style.backgroundSize = "cover";
@@ -90,6 +102,7 @@ function loadProjects() {
               );
             };
 
+            // Trim title and description to make sure it is visible
             const displayTitle =
               project.title.length > 75
                 ? project.title.slice(0, 75) + "..."
@@ -108,6 +121,7 @@ function loadProjects() {
           });
       });
 
+      // for each approved
       approved.forEach((project) => {
         fetch(`/api/user/${project.author}`)
           .then((response) => {
@@ -117,9 +131,11 @@ function loadProjects() {
             return response.json();
           })
           .then((data) => {
+            // Create card
             const card = document.createElement("div");
             card.classList.add("card");
 
+            // Image background
             if (project.image) {
               card.style.backgroundImage = `url(${project.image})`;
               card.style.backgroundSize = "cover";
@@ -142,6 +158,7 @@ function loadProjects() {
               );
             };
 
+            // Trim title and description to make sure it fits
             const displayTitle =
               project.title.length > 75
                 ? project.title.slice(0, 75) + "..."
@@ -160,6 +177,7 @@ function loadProjects() {
           });
       });
 
+      // For each denied
       denied.forEach((project) => {
         fetch(`/api/user/${project.author}`)
           .then((response) => {
@@ -169,9 +187,11 @@ function loadProjects() {
             return response.json();
           })
           .then((data) => {
+            // Create card
             const card = document.createElement("div");
             card.classList.add("card");
 
+            // Set image background
             if (project.image) {
               card.style.backgroundImage = `url(${project.image})`;
               card.style.backgroundSize = "cover";
@@ -193,6 +213,7 @@ function loadProjects() {
               );
             };
 
+            // Trim dispaly and description to make sure it fits
             const displayTitle =
               project.title.length > 75
                 ? project.title.slice(0, 75) + "..."
@@ -212,10 +233,13 @@ function loadProjects() {
       });
     });
 }
+
+// Approve projects
 function approveProject(id) {
   fetch(`/api/approve/${id}`, { method: "POST" })
     .then((response) => response.json())
     .then((data) => {
+      // Yeah
       if (data.message) {
         showToast("Project approved!", { color: "success" });
         closeModal();
@@ -231,6 +255,7 @@ function approveProject(id) {
 }
 
 function confirmDenyProject(id, title) {
+  // This function is mainly to get the deny message :)
   openModalHTML(
     title,
     `
