@@ -88,6 +88,9 @@ function openSubmitModal() {
             
             <label for="githubLink">Github Link:</label>
             <input type="url" id="githubLink" name="githubLink" required>
+
+            <label for="projectImage">Project Image:</label>
+            <input type="file" id="projectImage" name="projectImage" accept="image/*" required>
             
             <button type="submit" class="button">Submit</button>
           </form>
@@ -114,20 +117,19 @@ function openSubmitModal() {
 
           // Get form data
           const formData = new FormData(this);
-          const data = Object.fromEntries(formData);
 
           // ADd the hackatime project  to the data
           const selectedOption =
             selectHackatimeMenu.options[selectHackatimeMenu.selectedIndex];
-          data.hackatimeTime = selectedOption.getAttribute("data-time");
+          formData.append(
+            "hackatimeTime",
+            selectedOption.getAttribute("data-time")
+          );
 
           // Submit the project
           fetch("/api/submitproject", {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(data),
+            body: formData,
           })
             .then((response) => {
               // If the project was submitted show success toast!

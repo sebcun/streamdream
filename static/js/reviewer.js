@@ -67,6 +67,14 @@ function loadProjects() {
           .then((data) => {
             const card = document.createElement("div");
             card.classList.add("card");
+
+            if (project.image) {
+              card.style.backgroundImage = `url(${project.image})`;
+              card.style.backgroundSize = "cover";
+              card.style.backgroundPosition = "center";
+              card.style.backgroundRepeat = "no-repeat";
+            }
+
             card.onclick = () => {
               openModalHTML(
                 project.title,
@@ -111,6 +119,14 @@ function loadProjects() {
           .then((data) => {
             const card = document.createElement("div");
             card.classList.add("card");
+
+            if (project.image) {
+              card.style.backgroundImage = `url(${project.image})`;
+              card.style.backgroundSize = "cover";
+              card.style.backgroundPosition = "center";
+              card.style.backgroundRepeat = "no-repeat";
+            }
+
             card.onclick = () => {
               console.log(project);
               openModalHTML(
@@ -155,6 +171,14 @@ function loadProjects() {
           .then((data) => {
             const card = document.createElement("div");
             card.classList.add("card");
+
+            if (project.image) {
+              card.style.backgroundImage = `url(${project.image})`;
+              card.style.backgroundSize = "cover";
+              card.style.backgroundPosition = "center";
+              card.style.backgroundRepeat = "no-repeat";
+            }
+
             card.onclick = () => {
               openModalHTML(
                 project.title,

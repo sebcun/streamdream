@@ -81,3 +81,17 @@
   margin-top: 20px;
   align-self: flex-start;
 }
+
+.submit-form input[type="file"] {
+  padding: 10px;
+  border: 2px solid #161616;
+  background: #464646;
+  color: white;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.submit-form input[type="file"]:focus {
+  border-color: #ff1f1f;
+  outline: none;
+}

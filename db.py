@@ -201,8 +201,8 @@ def createRule(rule, description, color=''):
 
     return {"message": "Rule created successfully.", "ruleid": ruleid}, 201
 
-def createProject(title, description, author, hackatimeProject, hackatimeTime, demoLink, githubLink, image=''):
-    if not title or not description or not author or not hackatimeProject or not hackatimeTime or not demoLink or not githubLink:
+def createProject(title, description, author, hackatimeProject, hackatimeTime, demoLink, githubLink, image):
+    if not title or not description or not author or not hackatimeProject or not hackatimeTime or not demoLink or not githubLink or not image:
         return {"error": "All fields are required."}, 400
     
     conn = getDbConnection()

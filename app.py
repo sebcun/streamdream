@@ -2,6 +2,7 @@
 from flask import Flask, jsonify, request, render_template, redirect, session, url_for
 from db import getFAQS, initDb, createFAQ, getRewards, createReward, getProjects, getRules, createRule, createProject, updateProjectApproval, createOrUpdateProfile, getProfile, createOrder, getOrders, updateOrderStatus, getProject, getIdeas, createIdea
 import requests, os,random
+from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
 
 # ENV
@@ -219,23 +220,37 @@ def submitProjectAPI():
     if not user:
         return jsonify({"error": "You must be logged in to submit a project."}), 401
     
-    # Get request data
-    data = request.get_json()
-    if not data:
-        return jsonify({"error": "Invalid request data."}), 400
+    title = request.form.get("projectName")
+    description = request.form.get("projectDescription")
+    hackatimeProject = request.form.get("hackatimeProject")
+    hackatimeTime = request.form.get("hackatimeTime")
+    demoLink = request.form.get("demoLink")
+    githubLink = request.form.get("githubLink")
+
+    # Handle image
+    imageFile = request.files.get("projectImage")
+    if not imageFile or imageFile.filename =='':
+        return jsonify({"error": "Image is required."}), 400
     
-    title = data.get("projectName")
-    description = data.get("projectDescription")
-    hackatimeProject = data.get("hackatimeProject")
-    hackatimeTime = data.get("hackatimeTime")
-    demoLink = data.get("demoLink")
-    githubLink = data.get("githubLink")
+    # Validate the image
+    allowedExtensions = {"png", 'jpg', "jpeg", "gif"}
+    if '.' not in imageFile.filename or imageFile.filename.rsplit('.', 1)[1].lower() not in allowedExtensions:
+        return jsonify({"error": "Invalid image file type."}), 400
     
+    # Download the image
+    fileName = secure_filename(imageFile.filename)
+    imagesDir = os.path.join(app.root_path, 'static', 'images')
+    os.makedirs(imagesDir, exist_ok=True)
+    imagePath = os.path.join(imagesDir, fileName)
+    imageFile.save(imagePath)
+    relativePath = f"static/images/{fileName}"
+
+
     # Check request data
     if not all([title, description, hackatimeProject, hackatimeTime, demoLink, githubLink]):
         return jsonify({"error": "All fields are required."}), 400
     
-    response, status = createProject(title, description, user, hackatimeProject, hackatimeTime, demoLink, githubLink)
+    response, status = createProject(title, description, user, hackatimeProject, hackatimeTime, demoLink, githubLink, relativePath)
     return jsonify(response), status
 
 # Submit Order
