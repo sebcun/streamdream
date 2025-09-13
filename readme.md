@@ -75,4 +75,4 @@ If you run into any issues or need support, please open an issue on the repo or 
 
 # License
 
-This project is licensed under the MIT License - see [LICENSE] for details.
+This project is licensed under the MIT License - see [LICENSE](https://github.com/sebcun/streamdream/blob/main/LICENSE) for details.
