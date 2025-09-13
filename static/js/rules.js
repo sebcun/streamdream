@@ -1,16 +1,22 @@
 rulesContainer = document.getElementById("rulesContainer");
 
 document.addEventListener("DOMContentLoaded", function () {
+  // Check rules to be sure
   if (rulesContainer) {
     fetch("/api/rules")
       .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response error");
-        }
-        return response.json();
+        return response.json().then((data) => ({ response, data }));
       })
-      .then((data) => {
+      .then(({ response, data }) => {
+        // If there is an error, throw that!
+        if (data["error"]) {
+          throw new Error(`${response.status} | ${data["error"]}`);
+        }
+
+        // Success
+        // For each rule
         data.forEach((rule) => {
+          // Create card
           const card = document.createElement("div");
           card.classList.add("card");
           if (rule.color) {
@@ -18,6 +24,7 @@ document.addEventListener("DOMContentLoaded", function () {
           }
           card.onclick = () => openModal(rule.rule, rule.description);
 
+          // Trim rule and descriptiont o make sure it fits
           const displayRule =
             rule.rule.length > 75 ? rule.rule.slice(0, 75) + "..." : rule.rule;
 
@@ -32,6 +39,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
           rulesContainer.appendChild(card);
         });
+      })
+      .catch((error) => {
+        console.log("Error getting rules:", error);
+        showToast(error.message, { color: "error" });
       });
   }
 });

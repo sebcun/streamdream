@@ -1,16 +1,22 @@
 rewardContainer = document.getElementById("rewardContainer");
 
 document.addEventListener("DOMContentLoaded", function () {
+  // Just to be sure :)
   if (rewardContainer) {
     fetch("/api/rewards")
       .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response error");
-        }
-        return response.json();
+        return response.json().then((data) => ({ response, data }));
       })
-      .then((data) => {
+      .then(({ response, data }) => {
+        // If there is an error
+        if (data["error"]) {
+          throw new Error(`${response.status} | ${data["error"]}`);
+        }
+
+        // Success
+        // For each reward
         data.forEach((reward) => {
+          // Create card
           const card = document.createElement("div");
           card.classList.add("card");
           if (reward.color) {
@@ -23,12 +29,18 @@ document.addEventListener("DOMContentLoaded", function () {
               reward.description,
               reward.price
             );
+
+          // Set contents
           card.innerHTML = `
             <h2>${reward.reward}</h2>
             <p>${reward.price} Hours</p>`;
 
           rewardContainer.appendChild(card);
         });
+      })
+      .catch((error) => {
+        console.log("Error fetching rewards:", error);
+        showToast(error.message, { color: "error" });
       });
   }
 });
@@ -39,6 +51,7 @@ function showReward(id, title, description, hours) {
       return response.json();
     })
     .then((data) => {
+      // If there is an error means they arent logged in so show them just the reward
       if (data.error) {
         openModalHTML(
           title,
@@ -48,6 +61,7 @@ function showReward(id, title, description, hours) {
         `
         );
       } else {
+        // Get escapedtitle and data so it is able to be parsed to the purchaseReward function
         const escapedTitle = title
           .replace(/"/g, '\\"')
           .replace(/'/g, "\\'")
@@ -57,6 +71,7 @@ function showReward(id, title, description, hours) {
           .replace(/'/g, "\\'")
           .replace(/\n/g, "\\n");
 
+        // Show the modal
         openModalHTML(
           title,
           `
@@ -71,8 +86,10 @@ function showReward(id, title, description, hours) {
 
 function purchaseReward(userDataString, id, title, hours) {
   const userData = JSON.parse(userDataString);
-  console.log(userData);
+
+  // Check that the user can afford the reward
   if (userData.balance >= hours) {
+    // Confirm the order, and fill out any shipping/requirements
     openModalHTML(
       `Confirm Order of ${title}`,
       `
@@ -109,18 +126,23 @@ function purchaseReward(userDataString, id, title, hours) {
         `
     );
 
+    // add event listener to form
     document
       .getElementById("submitOrderForm")
       .addEventListener("submit", (e) => {
+        // PRevent default refreesh
         e.preventDefault();
 
+        // Get form data
         const formData = new FormData(e.target);
         const data = Object.fromEntries(formData);
 
+        // Add important stuff to form data
         data.itemID = id;
         data.itemPrice = hours;
         data.itemName = title;
 
+        // Send in that order!
         fetch("/api/submitorder", {
           method: "POST",
           headers: {

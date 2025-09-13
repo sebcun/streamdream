@@ -1,6 +1,7 @@
 const submitStartBtn = document.getElementById("submit-start-btn");
 
 document.addEventListener("DOMContentLoaded", function () {
+  // Get /me to check if they are logged in for whether or not to show the submit button
   fetch("/api/me")
     .then((response) => {
       if (!response.ok) {
@@ -17,6 +18,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
+// Open the submit checklist
 function openSubmitChecklist() {
   openModalHTML(
     "Are you ready to submit?",
@@ -49,23 +51,23 @@ function openSubmitChecklist() {
   );
 }
 
+// Open the submit modal
 function openSubmitModal() {
   document.getElementById("submitBtn").disabled = true;
   document.getElementById("submitBtn").textContent = "Loading...";
+
+  // Get hackatime to load projects
   fetch("/api/hackatime")
     .then((response) => {
-      if (!response.ok) {
-        submitStartBtn.textContent = "Login with Slack";
-        submitStartBtn.onclick = function () {
-          window.location = "/login";
-        };
-        return;
-      }
-      return response.json();
+      return response.json().then((data) => ({ response, data }));
     })
-    .then((data) => {
-      if (!data) return;
+    .then(({ response, data }) => {
+      // If there is an error throw that!
+      if (data["error"]) {
+        throw new Error(`${response.status} | ${data["error"]}`);
+      }
 
+      // Success
       openModalHTML(
         "Submit Project",
         `
@@ -92,6 +94,7 @@ function openSubmitModal() {
         `
       );
 
+      // Load hackatime projects
       const selectHackatimeMenu = document.getElementById("hackatimeProject");
       data.data["projects"].forEach((project) => {
         const option = document.createElement("option");
@@ -102,18 +105,23 @@ function openSubmitModal() {
         selectHackatimeMenu.appendChild(option);
       });
 
+      // Add event listener to form
       document
         .getElementById("submitForm")
         .addEventListener("submit", function (e) {
+          // Prevent defaulkt
           e.preventDefault();
 
+          // Get form data
           const formData = new FormData(this);
           const data = Object.fromEntries(formData);
 
+          // ADd the hackatime project  to the data
           const selectedOption =
             selectHackatimeMenu.options[selectHackatimeMenu.selectedIndex];
           data.hackatimeTime = selectedOption.getAttribute("data-time");
 
+          // Submit the project
           fetch("/api/submitproject", {
             method: "POST",
             headers: {
@@ -122,6 +130,7 @@ function openSubmitModal() {
             body: JSON.stringify(data),
           })
             .then((response) => {
+              // If the project was submitted show success toast!
               if (response.ok) {
                 showToast(
                   "Project has been submitted for review! Check it out on your profile page.",
@@ -143,9 +152,15 @@ function openSubmitModal() {
               showToast("Network error. Please try again.", { color: "error" });
             });
         });
+    })
+    .catch((error) => {
+      console.log("Error fetching hackatime:", error);
+      showToast(error.message, { color: "error" });
+      closeModal();
     });
 }
 
+// Check if all checkboxes are checked, if yes enable the submit button
 function checkAll() {
   const checkboxes = document.querySelectorAll('input[type="checkbox"]');
   const allChecked = Array.from(checkboxes).every((cb) => cb.checked);
