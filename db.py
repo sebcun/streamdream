@@ -292,3 +292,11 @@ def getProfile(userid=None, slackid=None):
         return {'userid': profile[0], 'slack_id': profile[1], 'email': profile[2], 'name': profile[3], 'avatar': profile[4], 'role': profile[5], 'balance': profile[6], 'created_at': profile[7], 'updated_at': profile[8]}, 200
     
     return {"error": "User not found."}, 404
+
+def getProject(projectid):
+    conn = getDbConnection()
+    project = conn.execute('SELECT id, title, description, author, hackatime_project, hackatime_time, demo_link, github_link, image, approved, deny_message, reviewer, created_at FROM projects WHERE id = ?', (projectid,)).fetchone()
+    conn.close()
+    if project:
+        return {'id': project[0], 'title': project[1], 'description': project[2], 'author': project[3], 'hackatime_project': project[4], 'hackatime_time': project[5], 'demo_link': project[6], 'github_link': project[7], 'image': project[8], 'approved': project[9], 'deny_message': project[10], 'reviewer': project[11], 'created_at': project[12]}, 200
+    return {"error": "Project not found."}, 404

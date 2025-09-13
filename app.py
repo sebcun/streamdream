@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request, render_template, redirect, session, url_for
-from db import getFAQS, initDb, createFAQ, getRewards, createReward, getProjects, getRules, createRule, createProject, updateProjectApproval, createOrUpdateProfile, getProfile, createOrder, getOrders, updateOrderStatus
+from db import getFAQS, initDb, createFAQ, getRewards, createReward, getProjects, getRules, createRule, createProject, updateProjectApproval, createOrUpdateProfile, getProfile, createOrder, getOrders, updateOrderStatus, getProject
 import requests, os,random
 from dotenv import load_dotenv
 load_dotenv()
@@ -8,7 +8,7 @@ app.secret_key=os.getenv('SECRET_KEY', "YourSecretKey")
 
 SLACK_CLIENT_ID = os.getenv('SLACK_CLIENT_ID')
 SLACK_CLIENT_SECRET = os.getenv('SLACK_CLIENT_SECRET')
-SLACK_REDIRECT_URI = "https://amazing-earwig-reliably.ngrok-free.app/slack/callback"
+SLACK_REDIRECT_URI = "https://vmvje-180-181-203-128.a.free.pinggy.link/slack/callback"
 
 initDb(os.getenv('ADMIN_SLACK_ID'))
 
@@ -192,6 +192,25 @@ def approveProject(projectid):
     if status == 200:
         if response['role'] == 0:
             return jsonify({"error": "Not authorized."}), 403
+        
+    response, status = getProject(projectid)
+    if status != 200:
+        return jsonify(response), status
+    
+    hours = 0
+    if 'h' in response['hackatime_time']:
+        hoursPart = response['hackatime_time'].split('h')[0].strip()
+        try:
+            hours = int(hoursPart)
+        except:
+            hours = 0
+    
+    if hours > 0:
+        author = response['author']
+        response, status = getProfile(slackid=author)
+        if status == 200:
+            newBalance = response['balance'] + hours
+            createOrUpdateProfile(slackid=author, balance=newBalance)
     
     response, status = updateProjectApproval(projectid, 1, user)
     return jsonify(response), status
